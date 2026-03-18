@@ -1,34 +1,64 @@
-export interface Address {
-  name: string;
-  company?: string;
-  street: string;
-  city: string;
-  state?: string;
-  zip: string;
-  country: string;
-  phone: string;
-}
-
-export interface ShipmentDetails {
-  serviceType: "EXPRESS_WORLDWIDE" | "EXPRESS_9:00" | "EXPRESS_12:00" | "ECONOMY_SELECT" | "EXPRESS_ENVELOPE";
-  packageType: "DOCUMENT" | "PACKAGE" | "PALLET";
-  weight: string; // in lbs
-  length: string; // in inches
-  width: string;
-  height: string;
+export interface ShipmentInfoForm {
+  originCountry: string;
+  originCity: string;
+  originZip: string;
+  destinationCountry: string;
+  destinationCity: string;
+  destinationZip: string;
+  residentialAddress: boolean;
+  description: string;
+  contentType: "DOCUMENT" | "PACKAGE" | "";
+  shipmentPurpose: string;
   declaredValue: string;
   currency: string;
-  description: string;
-  customsRequired: boolean;
-  harmonizedCode?: string;
-  countryOfOrigin?: string;
+  weight: string;
+  length: string;
+  width: string;
+  height: string;
   numberOfPieces: string;
+  serviceType: string;
+}
+
+export interface PartyForm {
+  companyName: string;
+  contactName: string;
+  address1: string;
+  address2: string;
+  phone: string;
+  email: string;
+  partyTraderType: string;
+}
+
+export interface CustomsForm {
+  customsRequired: boolean;
+  harmonizedCode: string;
+  countryOfOrigin: string;
+}
+
+export interface InvoiceItem {
+  quantity: string;
+  unit: string;
+  countryOfOrigin: string;
+  description: string;
+  commodity: string;
+  totalWeight: string;
+  unitValue: string;
+}
+
+export interface CommercialInvoiceForm {
+  invoiceType: string;
+  tradingTransactionType: string;
+  number: string;
+  remarks: string;
+  items: InvoiceItem[];
 }
 
 export interface ShipmentForm {
-  sender: Address;
-  receiver: Address;
-  shipment: ShipmentDetails;
+  shipmentInfo: ShipmentInfoForm;
+  shipper: PartyForm;
+  consignee: PartyForm;
+  customs: CustomsForm;
+  commercialInvoice: CommercialInvoiceForm;
 }
 
 export interface NPCDialogue {
@@ -64,11 +94,4 @@ export interface ScenarioResult {
   correctFields: number;
   fieldResults: FieldResult[];
   timeSpent: number;
-}
-
-export interface GameState {
-  currentScenarioIndex: number;
-  scenarios: NPCScenario[];
-  results: ScenarioResult[];
-  startTime: number;
 }

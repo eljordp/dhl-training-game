@@ -1,47 +1,40 @@
 "use client";
 
-interface DHLHeaderProps {
-  scenarioNumber?: number;
-  totalScenarios?: number;
-  showProgress?: boolean;
-}
-
-export default function DHLHeader({ scenarioNumber, totalScenarios, showProgress }: DHLHeaderProps) {
+export default function DHLHeader() {
   return (
-    <header className="bg-dhl-yellow border-b-4 border-dhl-red flex-shrink-0">
-      <div className="max-w-[1400px] mx-auto px-3 md:px-4 py-2 flex items-center justify-between">
-        <div className="flex items-center gap-2 md:gap-3">
-          {/* DHL Logo */}
-          <div className="bg-dhl-red text-white font-black text-lg md:text-2xl px-2 md:px-3 py-0.5 md:py-1 rounded-sm tracking-wider">
+    <header className="bg-[#FFCC00] border-b border-gray-300 flex-shrink-0">
+      <div className="px-3 py-1.5 flex items-center justify-between" style={{ fontFamily: "Arial, sans-serif" }}>
+        {/* Left: Logo + Title + Role info */}
+        <div className="flex items-center gap-3">
+          {/* DHL red pill logo */}
+          <div
+            className="text-white font-black italic px-3 py-1 rounded-full text-base leading-tight"
+            style={{ background: "#D40511", fontSize: "18px", letterSpacing: "0.5px" }}
+          >
             DHL
           </div>
-          <div className="text-dhl-dark">
-            <div className="font-bold text-xs md:text-sm">CRA Training</div>
-            <div className="text-[10px] md:text-xs text-dhl-gray hidden sm:block">Simulator v1.0</div>
+
+          {/* CRA 10 + subtitle */}
+          <div>
+            <div className="font-bold text-black" style={{ fontSize: "16px", lineHeight: "1.2" }}>
+              CRA 10
+            </div>
+            <div className="text-gray-600" style={{ fontSize: "11px", lineHeight: "1.3" }}>
+              Role: PRICE OVERRIDE &nbsp;|&nbsp; UNITED STATES OF AMERICA &nbsp;|&nbsp; Location: Oak Lawn 1 - 409 - Agent
+            </div>
           </div>
         </div>
 
-        {showProgress && scenarioNumber && totalScenarios && (
-          <div className="flex items-center gap-2 md:gap-4">
-            <div className="text-[10px] md:text-xs text-dhl-gray font-medium">
-              {scenarioNumber}/{totalScenarios}
-            </div>
-            <div className="flex gap-0.5 md:gap-1">
-              {Array.from({ length: totalScenarios }).map((_, i) => (
-                <div
-                  key={i}
-                  className={`w-4 md:w-6 h-1.5 md:h-2 rounded-sm ${
-                    i < scenarioNumber
-                      ? "bg-dhl-red"
-                      : i === scenarioNumber
-                        ? "bg-dhl-yellow border border-dhl-red"
-                        : "bg-gray-300"
-                  }`}
-                />
-              ))}
-            </div>
+        {/* Right: Installation + email */}
+        <div className="hidden sm:flex flex-col items-end gap-0.5">
+          <div className="text-gray-600 flex items-center gap-1.5" style={{ fontSize: "11px" }}>
+            <span>Installation: 1 (GMT-04:00)</span>
+            <span className="text-gray-500">🔔</span>
           </div>
-        )}
+          <div className="text-gray-700" style={{ fontSize: "11px" }}>
+            retail.cubichomesolutions.oaklawn1@dhl.com
+          </div>
+        </div>
       </div>
     </header>
   );

@@ -36,41 +36,66 @@ interface FieldDef {
   label: string;
   getValue: (form: ShipmentForm) => string | boolean | undefined;
   required: boolean;
+  // if provided, only grade this field when condition is true
+  condition?: (correct: ShipmentForm) => boolean;
 }
 
 const fieldDefs: FieldDef[] = [
-  // Sender
-  { path: "sender.name", label: "Sender Name", getValue: (f) => f.sender.name, required: true },
-  { path: "sender.company", label: "Sender Company", getValue: (f) => f.sender.company, required: false },
-  { path: "sender.street", label: "Sender Street", getValue: (f) => f.sender.street, required: true },
-  { path: "sender.city", label: "Sender City", getValue: (f) => f.sender.city, required: true },
-  { path: "sender.state", label: "Sender State", getValue: (f) => f.sender.state, required: false },
-  { path: "sender.zip", label: "Sender ZIP", getValue: (f) => f.sender.zip, required: true },
-  { path: "sender.country", label: "Sender Country", getValue: (f) => f.sender.country, required: true },
-  { path: "sender.phone", label: "Sender Phone", getValue: (f) => f.sender.phone, required: true },
-  // Receiver
-  { path: "receiver.name", label: "Receiver Name", getValue: (f) => f.receiver.name, required: true },
-  { path: "receiver.company", label: "Receiver Company", getValue: (f) => f.receiver.company, required: false },
-  { path: "receiver.street", label: "Receiver Street", getValue: (f) => f.receiver.street, required: true },
-  { path: "receiver.city", label: "Receiver City", getValue: (f) => f.receiver.city, required: true },
-  { path: "receiver.state", label: "Receiver State/Province", getValue: (f) => f.receiver.state, required: false },
-  { path: "receiver.zip", label: "Receiver Postal Code", getValue: (f) => f.receiver.zip, required: true },
-  { path: "receiver.country", label: "Receiver Country", getValue: (f) => f.receiver.country, required: true },
-  { path: "receiver.phone", label: "Receiver Phone", getValue: (f) => f.receiver.phone, required: true },
-  // Shipment
-  { path: "shipment.serviceType", label: "Service Type", getValue: (f) => f.shipment.serviceType, required: true },
-  { path: "shipment.packageType", label: "Package Type", getValue: (f) => f.shipment.packageType, required: true },
-  { path: "shipment.weight", label: "Weight", getValue: (f) => f.shipment.weight, required: true },
-  { path: "shipment.length", label: "Length", getValue: (f) => f.shipment.length, required: true },
-  { path: "shipment.width", label: "Width", getValue: (f) => f.shipment.width, required: true },
-  { path: "shipment.height", label: "Height", getValue: (f) => f.shipment.height, required: true },
-  { path: "shipment.numberOfPieces", label: "Number of Pieces", getValue: (f) => f.shipment.numberOfPieces, required: true },
-  { path: "shipment.declaredValue", label: "Declared Value", getValue: (f) => f.shipment.declaredValue, required: true },
-  { path: "shipment.currency", label: "Currency", getValue: (f) => f.shipment.currency, required: true },
-  { path: "shipment.description", label: "Description", getValue: (f) => f.shipment.description, required: true },
-  { path: "shipment.customsRequired", label: "Customs Required", getValue: (f) => f.shipment.customsRequired, required: true },
-  { path: "shipment.harmonizedCode", label: "HS Code", getValue: (f) => f.shipment.harmonizedCode, required: false },
-  { path: "shipment.countryOfOrigin", label: "Country of Origin", getValue: (f) => f.shipment.countryOfOrigin, required: false },
+  // shipmentInfo fields
+  { path: "shipmentInfo.originCountry", label: "Origin Country", getValue: (f) => f.shipmentInfo.originCountry, required: true },
+  { path: "shipmentInfo.originCity", label: "Origin City", getValue: (f) => f.shipmentInfo.originCity, required: true },
+  { path: "shipmentInfo.originZip", label: "Origin ZIP", getValue: (f) => f.shipmentInfo.originZip, required: true },
+  { path: "shipmentInfo.destinationCountry", label: "Destination Country", getValue: (f) => f.shipmentInfo.destinationCountry, required: true },
+  { path: "shipmentInfo.destinationCity", label: "Destination City", getValue: (f) => f.shipmentInfo.destinationCity, required: true },
+  { path: "shipmentInfo.destinationZip", label: "Destination ZIP", getValue: (f) => f.shipmentInfo.destinationZip, required: true },
+  { path: "shipmentInfo.description", label: "Contents Description", getValue: (f) => f.shipmentInfo.description, required: true },
+  { path: "shipmentInfo.contentType", label: "Content Type", getValue: (f) => f.shipmentInfo.contentType, required: true },
+  { path: "shipmentInfo.shipmentPurpose", label: "Shipment Purpose", getValue: (f) => f.shipmentInfo.shipmentPurpose, required: true },
+  { path: "shipmentInfo.declaredValue", label: "Declared Value", getValue: (f) => f.shipmentInfo.declaredValue, required: true },
+  { path: "shipmentInfo.weight", label: "Weight (lbs)", getValue: (f) => f.shipmentInfo.weight, required: true },
+  { path: "shipmentInfo.numberOfPieces", label: "Number of Pieces", getValue: (f) => f.shipmentInfo.numberOfPieces, required: true },
+  { path: "shipmentInfo.serviceType", label: "Service Type", getValue: (f) => f.shipmentInfo.serviceType, required: true },
+  // shipper fields
+  { path: "shipper.companyName", label: "Shipper Name/Company", getValue: (f) => f.shipper.companyName, required: true },
+  { path: "shipper.contactName", label: "Shipper Contact", getValue: (f) => f.shipper.contactName, required: true },
+  { path: "shipper.address1", label: "Shipper Address", getValue: (f) => f.shipper.address1, required: true },
+  { path: "shipper.phone", label: "Shipper Phone", getValue: (f) => f.shipper.phone, required: true },
+  // consignee fields
+  { path: "consignee.companyName", label: "Consignee Name/Company", getValue: (f) => f.consignee.companyName, required: true },
+  { path: "consignee.contactName", label: "Consignee Contact", getValue: (f) => f.consignee.contactName, required: true },
+  { path: "consignee.address1", label: "Consignee Address", getValue: (f) => f.consignee.address1, required: true },
+  { path: "consignee.phone", label: "Consignee Phone", getValue: (f) => f.consignee.phone, required: true },
+  // customs fields
+  {
+    path: "customs.harmonizedCode",
+    label: "HS/Harmonized Code",
+    getValue: (f) => f.customs.harmonizedCode,
+    required: false,
+    condition: (correct) => !!correct.customs.harmonizedCode,
+  },
+  { path: "customs.countryOfOrigin", label: "Country of Origin", getValue: (f) => f.customs.countryOfOrigin, required: true },
+  // commercial invoice fields — only graded when contentType is PACKAGE and items exist
+  {
+    path: "commercialInvoice.items[0].description",
+    label: "Invoice Item Description",
+    getValue: (f) => f.commercialInvoice.items[0]?.description ?? "",
+    required: false,
+    condition: (correct) => correct.shipmentInfo.contentType === "PACKAGE" && correct.commercialInvoice.items.length > 0,
+  },
+  {
+    path: "commercialInvoice.items[0].unitValue",
+    label: "Invoice Item Value",
+    getValue: (f) => f.commercialInvoice.items[0]?.unitValue ?? "",
+    required: false,
+    condition: (correct) => correct.shipmentInfo.contentType === "PACKAGE" && correct.commercialInvoice.items.length > 0,
+  },
+  {
+    path: "commercialInvoice.items[0].countryOfOrigin",
+    label: "Invoice Item Origin",
+    getValue: (f) => f.commercialInvoice.items[0]?.countryOfOrigin ?? "",
+    required: false,
+    condition: (correct) => correct.shipmentInfo.contentType === "PACKAGE" && correct.commercialInvoice.items.length > 0,
+  },
 ];
 
 export function gradeScenario(
@@ -84,11 +109,14 @@ export function gradeScenario(
   let totalGraded = 0;
 
   for (const def of fieldDefs) {
+    // Skip if condition not met
+    if (def.condition && !def.condition(correct)) continue;
+
     const userVal = String(def.getValue(userForm) ?? "");
     const correctVal = String(def.getValue(correct) ?? "");
 
-    // Skip optional fields that have no correct answer
-    if (!def.required && !correctVal) continue;
+    // Skip optional fields that have no correct answer and no condition
+    if (!def.required && !def.condition && !correctVal) continue;
 
     totalGraded++;
     const isCorrect = fuzzyMatch(userVal, correctVal);
