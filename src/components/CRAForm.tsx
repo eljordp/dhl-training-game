@@ -35,6 +35,7 @@ function FieldInput({
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
         placeholder={placeholder}
+        autoComplete="off"
       />
       {result === false && (
         <div className="text-[10px] text-dhl-error mt-0.5 font-medium">✗ Incorrect</div>
@@ -44,6 +45,12 @@ function FieldInput({
       )}
     </div>
   );
+}
+
+function SelectResult({ result }: { result?: boolean }) {
+  if (result === undefined) return null;
+  if (result) return <div className="text-[10px] text-dhl-success mt-0.5 font-medium">✓ Correct</div>;
+  return <div className="text-[10px] text-dhl-error mt-0.5 font-medium">✗ Incorrect</div>;
 }
 
 export default function CRAForm({ form, onChange, fieldResults, disabled }: CRAFormProps) {
@@ -62,10 +69,10 @@ export default function CRAForm({ form, onChange, fieldResults, disabled }: CRAF
   return (
     <div className="h-full overflow-y-auto custom-scrollbar">
       {/* CRA Toolbar */}
-      <div className="bg-dhl-dark text-white px-4 py-2 flex items-center justify-between sticky top-0 z-10">
+      <div className="bg-dhl-dark text-white px-3 md:px-4 py-2 flex items-center justify-between sticky top-0 z-10">
         <div className="flex items-center gap-2">
-          <span className="text-xs font-bold tracking-wider">NEW SHIPMENT</span>
-          <span className="text-[10px] text-gray-400 border border-gray-600 px-1.5 rounded">CRA-2024</span>
+          <span className="text-[11px] md:text-xs font-bold tracking-wider">NEW SHIPMENT</span>
+          <span className="text-[9px] md:text-[10px] text-gray-400 border border-gray-600 px-1 md:px-1.5 rounded">CRA-2024</span>
         </div>
         <div className="flex items-center gap-1 text-[10px] text-gray-400">
           <span className="w-2 h-2 bg-green-500 rounded-full"></span>
@@ -73,16 +80,16 @@ export default function CRAForm({ form, onChange, fieldResults, disabled }: CRAF
         </div>
       </div>
 
-      <div className="p-4 space-y-4">
+      <div className="p-3 md:p-4 space-y-3 md:space-y-4">
         {/* Sender Section */}
         <div className="border border-dhl-border rounded bg-white">
-          <div className="bg-dhl-red text-white px-3 py-1.5 text-xs font-bold tracking-wider flex items-center gap-2">
-            <span>📤</span> SENDER (SHIPPER) INFORMATION
+          <div className="bg-dhl-red text-white px-3 py-1.5 text-[11px] md:text-xs font-bold tracking-wider flex items-center gap-2">
+            <span>📤</span> SENDER INFO
           </div>
-          <div className="p-3 grid grid-cols-2 gap-2">
+          <div className="p-2.5 md:p-3 grid grid-cols-1 md:grid-cols-2 gap-2">
             <FieldInput label="Full Name *" value={form.sender.name} onChange={(v) => updateSender("name", v)} result={fr["sender.name"]} disabled={disabled} placeholder="John Doe" />
             <FieldInput label="Company" value={form.sender.company || ""} onChange={(v) => updateSender("company", v)} result={fr["sender.company"]} disabled={disabled} placeholder="Company name" />
-            <div className="col-span-2">
+            <div className="md:col-span-2">
               <FieldInput label="Street Address *" value={form.sender.street} onChange={(v) => updateSender("street", v)} result={fr["sender.street"]} disabled={disabled} placeholder="123 Main St" />
             </div>
             <FieldInput label="City *" value={form.sender.city} onChange={(v) => updateSender("city", v)} result={fr["sender.city"]} disabled={disabled} placeholder="City" />
@@ -112,6 +119,7 @@ export default function CRAForm({ form, onChange, fieldResults, disabled }: CRAF
                 <option value="KR">KR - South Korea</option>
                 <option value="IN">IN - India</option>
               </select>
+              <SelectResult result={fr["sender.country"]} />
             </div>
             <FieldInput label="Phone *" value={form.sender.phone} onChange={(v) => updateSender("phone", v)} result={fr["sender.phone"]} disabled={disabled} placeholder="+1-555-0100" />
           </div>
@@ -119,13 +127,13 @@ export default function CRAForm({ form, onChange, fieldResults, disabled }: CRAF
 
         {/* Receiver Section */}
         <div className="border border-dhl-border rounded bg-white">
-          <div className="bg-dhl-red text-white px-3 py-1.5 text-xs font-bold tracking-wider flex items-center gap-2">
-            <span>📥</span> RECEIVER (CONSIGNEE) INFORMATION
+          <div className="bg-dhl-red text-white px-3 py-1.5 text-[11px] md:text-xs font-bold tracking-wider flex items-center gap-2">
+            <span>📥</span> RECEIVER INFO
           </div>
-          <div className="p-3 grid grid-cols-2 gap-2">
+          <div className="p-2.5 md:p-3 grid grid-cols-1 md:grid-cols-2 gap-2">
             <FieldInput label="Full Name *" value={form.receiver.name} onChange={(v) => updateReceiver("name", v)} result={fr["receiver.name"]} disabled={disabled} placeholder="Jane Smith" />
             <FieldInput label="Company" value={form.receiver.company || ""} onChange={(v) => updateReceiver("company", v)} result={fr["receiver.company"]} disabled={disabled} placeholder="Company name" />
-            <div className="col-span-2">
+            <div className="md:col-span-2">
               <FieldInput label="Street Address *" value={form.receiver.street} onChange={(v) => updateReceiver("street", v)} result={fr["receiver.street"]} disabled={disabled} placeholder="456 Oak Ave" />
             </div>
             <FieldInput label="City *" value={form.receiver.city} onChange={(v) => updateReceiver("city", v)} result={fr["receiver.city"]} disabled={disabled} placeholder="City" />
@@ -158,6 +166,7 @@ export default function CRAForm({ form, onChange, fieldResults, disabled }: CRAF
                 <option value="ES">ES - Spain</option>
                 <option value="NL">NL - Netherlands</option>
               </select>
+              <SelectResult result={fr["receiver.country"]} />
             </div>
             <FieldInput label="Phone *" value={form.receiver.phone} onChange={(v) => updateReceiver("phone", v)} result={fr["receiver.phone"]} disabled={disabled} placeholder="+44-20-555-0100" />
           </div>
@@ -165,11 +174,11 @@ export default function CRAForm({ form, onChange, fieldResults, disabled }: CRAF
 
         {/* Shipment Details Section */}
         <div className="border border-dhl-border rounded bg-white">
-          <div className="bg-dhl-red text-white px-3 py-1.5 text-xs font-bold tracking-wider flex items-center gap-2">
+          <div className="bg-dhl-red text-white px-3 py-1.5 text-[11px] md:text-xs font-bold tracking-wider flex items-center gap-2">
             <span>📦</span> SHIPMENT DETAILS
           </div>
-          <div className="p-3 space-y-3">
-            <div className="grid grid-cols-2 gap-2">
+          <div className="p-2.5 md:p-3 space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <div>
                 <label className="cra-label">Service Type *</label>
                 <select
@@ -185,6 +194,7 @@ export default function CRAForm({ form, onChange, fieldResults, disabled }: CRAF
                   <option value="ECONOMY_SELECT">Economy Select</option>
                   <option value="EXPRESS_ENVELOPE">Express Envelope</option>
                 </select>
+                <SelectResult result={fr["shipment.serviceType"]} />
               </div>
               <div>
                 <label className="cra-label">Package Type *</label>
@@ -199,10 +209,11 @@ export default function CRAForm({ form, onChange, fieldResults, disabled }: CRAF
                   <option value="PACKAGE">Package</option>
                   <option value="PALLET">Pallet</option>
                 </select>
+                <SelectResult result={fr["shipment.packageType"]} />
               </div>
             </div>
 
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
               <FieldInput label="Weight (lbs) *" value={form.shipment.weight} onChange={(v) => updateShipment("weight", v)} result={fr["shipment.weight"]} disabled={disabled} placeholder="0" />
               <FieldInput label="Length (in)" value={form.shipment.length} onChange={(v) => updateShipment("length", v)} result={fr["shipment.length"]} disabled={disabled} placeholder="0" />
               <FieldInput label="Width (in)" value={form.shipment.width} onChange={(v) => updateShipment("width", v)} result={fr["shipment.width"]} disabled={disabled} placeholder="0" />
@@ -210,8 +221,8 @@ export default function CRAForm({ form, onChange, fieldResults, disabled }: CRAF
             </div>
 
             <div className="grid grid-cols-3 gap-2">
-              <FieldInput label="# of Pieces *" value={form.shipment.numberOfPieces} onChange={(v) => updateShipment("numberOfPieces", v)} result={fr["shipment.numberOfPieces"]} disabled={disabled} placeholder="1" />
-              <FieldInput label="Declared Value *" value={form.shipment.declaredValue} onChange={(v) => updateShipment("declaredValue", v)} result={fr["shipment.declaredValue"]} disabled={disabled} placeholder="0.00" />
+              <FieldInput label="# Pieces *" value={form.shipment.numberOfPieces} onChange={(v) => updateShipment("numberOfPieces", v)} result={fr["shipment.numberOfPieces"]} disabled={disabled} placeholder="1" />
+              <FieldInput label="Value *" value={form.shipment.declaredValue} onChange={(v) => updateShipment("declaredValue", v)} result={fr["shipment.declaredValue"]} disabled={disabled} placeholder="0.00" />
               <div>
                 <label className="cra-label">Currency</label>
                 <select
@@ -228,6 +239,7 @@ export default function CRAForm({ form, onChange, fieldResults, disabled }: CRAF
                   <option value="BRL">BRL</option>
                   <option value="CAD">CAD</option>
                 </select>
+                <SelectResult result={fr["shipment.currency"]} />
               </div>
             </div>
 
@@ -239,11 +251,11 @@ export default function CRAForm({ form, onChange, fieldResults, disabled }: CRAF
 
         {/* Customs Section */}
         <div className="border border-dhl-border rounded bg-white">
-          <div className="bg-dhl-yellow text-dhl-dark px-3 py-1.5 text-xs font-bold tracking-wider flex items-center gap-2">
-            <span>🛃</span> CUSTOMS / COMMERCIAL INVOICE
+          <div className="bg-dhl-yellow text-dhl-dark px-3 py-1.5 text-[11px] md:text-xs font-bold tracking-wider flex items-center gap-2">
+            <span>🛃</span> CUSTOMS
           </div>
-          <div className="p-3 space-y-3">
-            <div className="flex items-center gap-3">
+          <div className="p-2.5 md:p-3 space-y-3">
+            <div className="flex flex-wrap items-center gap-3">
               <label className="cra-label mb-0">Customs Required *</label>
               <label className="flex items-center gap-1.5 cursor-pointer">
                 <input
@@ -252,9 +264,9 @@ export default function CRAForm({ form, onChange, fieldResults, disabled }: CRAF
                   checked={form.shipment.customsRequired === true}
                   onChange={() => updateShipment("customsRequired", "true")}
                   disabled={disabled}
-                  className="accent-dhl-red"
+                  className="accent-dhl-red w-4 h-4"
                 />
-                <span className="text-xs">Yes</span>
+                <span className="text-sm md:text-xs">Yes</span>
               </label>
               <label className="flex items-center gap-1.5 cursor-pointer">
                 <input
@@ -263,9 +275,9 @@ export default function CRAForm({ form, onChange, fieldResults, disabled }: CRAF
                   checked={form.shipment.customsRequired === false}
                   onChange={() => updateShipment("customsRequired", "false")}
                   disabled={disabled}
-                  className="accent-dhl-red"
+                  className="accent-dhl-red w-4 h-4"
                 />
-                <span className="text-xs">No</span>
+                <span className="text-sm md:text-xs">No</span>
               </label>
               {fr["shipment.customsRequired"] === false && (
                 <span className="text-[10px] text-dhl-error font-medium">✗ Incorrect</span>
@@ -275,7 +287,7 @@ export default function CRAForm({ form, onChange, fieldResults, disabled }: CRAF
               )}
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <FieldInput
                 label="HS/Harmonized Code"
                 value={form.shipment.harmonizedCode || ""}
@@ -306,10 +318,14 @@ export default function CRAForm({ form, onChange, fieldResults, disabled }: CRAF
                   <option value="BR">BR - Brazil</option>
                   <option value="AU">AU - Australia</option>
                 </select>
+                <SelectResult result={fr["shipment.countryOfOrigin"]} />
               </div>
             </div>
           </div>
         </div>
+
+        {/* Bottom spacer for mobile action bar */}
+        <div className="h-2 md:h-0" />
       </div>
     </div>
   );

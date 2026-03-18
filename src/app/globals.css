@@ -32,18 +32,27 @@ body {
   background: var(--dhl-light-gray);
   color: var(--dhl-dark);
   font-family: Arial, Helvetica, sans-serif;
+  -webkit-text-size-adjust: 100%;
 }
 
 /* DHL CRA-style form inputs */
 .cra-input {
   width: 100%;
-  padding: 6px 8px;
+  padding: 10px 10px;
   border: 1px solid #ccc;
-  border-radius: 2px;
-  font-size: 13px;
+  border-radius: 4px;
+  font-size: 16px; /* prevents iOS zoom on focus */
   font-family: Arial, sans-serif;
   background: white;
   transition: border-color 0.15s;
+}
+
+@media (min-width: 768px) {
+  .cra-input {
+    padding: 6px 8px;
+    font-size: 13px;
+    border-radius: 2px;
+  }
 }
 
 .cra-input:focus {
@@ -64,13 +73,21 @@ body {
 
 .cra-select {
   width: 100%;
-  padding: 6px 8px;
+  padding: 10px 10px;
   border: 1px solid #ccc;
-  border-radius: 2px;
-  font-size: 13px;
+  border-radius: 4px;
+  font-size: 16px;
   font-family: Arial, sans-serif;
   background: white;
   cursor: pointer;
+}
+
+@media (min-width: 768px) {
+  .cra-select {
+    padding: 6px 8px;
+    font-size: 13px;
+    border-radius: 2px;
+  }
 }
 
 .cra-select:focus {
@@ -127,4 +144,11 @@ body {
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #999;
+}
+
+/* Safe area for notched phones */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
 }

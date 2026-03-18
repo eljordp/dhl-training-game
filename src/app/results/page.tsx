@@ -45,59 +45,59 @@ export default function ResultsPage() {
   const grade = getGrade(overallScore);
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="min-h-[100dvh] flex flex-col bg-gray-50">
       <DHLHeader />
 
-      <div className="flex-1 max-w-4xl mx-auto w-full px-4 py-8">
+      <div className="flex-1 max-w-4xl mx-auto w-full px-3 md:px-4 py-4 md:py-8">
         {/* Overall Score Card */}
-        <div className="bg-white border border-dhl-border rounded-lg shadow-sm mb-8 overflow-hidden">
-          <div className="bg-dhl-dark text-white px-6 py-4">
-            <h1 className="text-xl font-bold">Training Session Complete</h1>
-            <p className="text-sm text-gray-400 mt-1">Review your performance across all scenarios</p>
+        <div className="bg-white border border-dhl-border rounded-lg shadow-sm mb-4 md:mb-8 overflow-hidden">
+          <div className="bg-dhl-dark text-white px-4 md:px-6 py-3 md:py-4">
+            <h1 className="text-lg md:text-xl font-bold">Training Complete</h1>
+            <p className="text-xs md:text-sm text-gray-400 mt-0.5 md:mt-1">Review your performance</p>
           </div>
 
-          <div className="p-6 flex items-center gap-8">
+          <div className="p-4 md:p-6 flex flex-col sm:flex-row items-center gap-4 md:gap-8">
             {/* Grade Circle */}
-            <div className={`w-28 h-28 rounded-full ${grade.bg} flex items-center justify-center flex-shrink-0 score-reveal`}>
+            <div className={`w-24 h-24 md:w-28 md:h-28 rounded-full ${grade.bg} flex items-center justify-center flex-shrink-0 score-reveal`}>
               <div className="text-center">
-                <div className={`text-4xl font-black ${grade.color}`}>{grade.letter}</div>
+                <div className={`text-3xl md:text-4xl font-black ${grade.color}`}>{grade.letter}</div>
                 <div className={`text-sm font-bold ${grade.color}`}>{overallScore}%</div>
               </div>
             </div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-3 gap-6 flex-1">
+            <div className="grid grid-cols-3 gap-4 md:gap-6 flex-1 text-center sm:text-left">
               <div>
-                <div className="text-2xl font-black text-dhl-dark">{totalCorrect}/{totalFields}</div>
-                <div className="text-xs text-gray-500 font-medium">Fields Correct</div>
+                <div className="text-xl md:text-2xl font-black text-dhl-dark">{totalCorrect}/{totalFields}</div>
+                <div className="text-[10px] md:text-xs text-gray-500 font-medium">Fields Correct</div>
               </div>
               <div>
-                <div className="text-2xl font-black text-dhl-dark">{results.length}</div>
-                <div className="text-xs text-gray-500 font-medium">Scenarios Completed</div>
+                <div className="text-xl md:text-2xl font-black text-dhl-dark">{results.length}</div>
+                <div className="text-[10px] md:text-xs text-gray-500 font-medium">Scenarios</div>
               </div>
               <div>
-                <div className="text-2xl font-black text-dhl-dark">{formatTime(totalTime)}</div>
-                <div className="text-xs text-gray-500 font-medium">Total Time</div>
+                <div className="text-xl md:text-2xl font-black text-dhl-dark">{formatTime(totalTime)}</div>
+                <div className="text-[10px] md:text-xs text-gray-500 font-medium">Total Time</div>
               </div>
             </div>
           </div>
 
           {/* Performance Message */}
-          <div className={`px-6 py-3 text-sm font-medium border-t ${
+          <div className={`px-4 md:px-6 py-2 md:py-3 text-xs md:text-sm font-medium border-t ${
             overallScore >= 80 ? "bg-green-50 text-green-800 border-green-200" :
             overallScore >= 60 ? "bg-yellow-50 text-yellow-800 border-yellow-200" :
             "bg-red-50 text-red-800 border-red-200"
           }`}>
-            {overallScore >= 90 && "Outstanding performance! You demonstrate strong proficiency with the CRA system."}
-            {overallScore >= 80 && overallScore < 90 && "Good work! A few areas to review, but solid overall performance."}
-            {overallScore >= 60 && overallScore < 80 && "Needs improvement. Review the scenarios where you missed fields and try again."}
-            {overallScore < 60 && "Additional training recommended. Pay close attention to customer details and shipping requirements."}
+            {overallScore >= 90 && "Outstanding! Strong CRA proficiency."}
+            {overallScore >= 80 && overallScore < 90 && "Good work! A few areas to review."}
+            {overallScore >= 60 && overallScore < 80 && "Needs improvement. Review missed fields."}
+            {overallScore < 60 && "Additional training recommended."}
           </div>
         </div>
 
         {/* Individual Scenario Results */}
-        <div className="space-y-3">
-          <h2 className="text-sm font-bold text-dhl-gray uppercase tracking-wider">Scenario Breakdown</h2>
+        <div className="space-y-2 md:space-y-3">
+          <h2 className="text-xs md:text-sm font-bold text-dhl-gray uppercase tracking-wider">Scenario Breakdown</h2>
 
           {results.map((result) => {
             const sg = getGrade(result.score);
@@ -107,54 +107,84 @@ export default function ResultsPage() {
               <div key={result.scenarioId} className="bg-white border border-dhl-border rounded-lg overflow-hidden shadow-sm">
                 <button
                   onClick={() => setExpandedScenario(isExpanded ? null : result.scenarioId)}
-                  className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition cursor-pointer"
+                  className="w-full px-3 md:px-4 py-2.5 md:py-3 flex items-center justify-between hover:bg-gray-50 transition cursor-pointer"
                 >
-                  <div className="flex items-center gap-3">
-                    <span className={`text-sm font-bold px-2 py-0.5 rounded ${sg.bg} ${sg.color}`}>
+                  <div className="flex items-center gap-2 md:gap-3">
+                    <span className={`text-xs md:text-sm font-bold px-1.5 md:px-2 py-0.5 rounded ${sg.bg} ${sg.color}`}>
                       {result.score}%
                     </span>
-                    <span className="font-medium text-sm">{result.npcName}</span>
-                    <span className="text-xs text-gray-400">
+                    <span className="font-medium text-xs md:text-sm">{result.npcName}</span>
+                    <span className="text-[10px] md:text-xs text-gray-400 hidden sm:inline">
                       {result.correctFields}/{result.totalFields} correct
                     </span>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs text-gray-400">{formatTime(result.timeSpent)}</span>
+                  <div className="flex items-center gap-2 md:gap-3">
+                    <span className="text-[10px] md:text-xs text-gray-400">{formatTime(result.timeSpent)}</span>
                     <span className="text-gray-400 text-xs">{isExpanded ? "▲" : "▼"}</span>
                   </div>
                 </button>
 
                 {isExpanded && (
-                  <div className="border-t border-dhl-border px-4 py-3">
-                    <table className="w-full text-xs">
-                      <thead>
-                        <tr className="text-left text-gray-500 border-b">
-                          <th className="pb-2 font-medium">Field</th>
-                          <th className="pb-2 font-medium">Your Answer</th>
-                          <th className="pb-2 font-medium">Correct Answer</th>
-                          <th className="pb-2 font-medium text-center">Result</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {result.fieldResults.map((fr) => (
-                          <tr
-                            key={fr.field}
-                            className={`border-b last:border-0 ${fr.correct ? "" : "bg-red-50"}`}
-                          >
-                            <td className="py-1.5 font-medium text-gray-700">{fr.label}</td>
-                            <td className="py-1.5 text-gray-600">{fr.userValue || "—"}</td>
-                            <td className="py-1.5 text-gray-600">{fr.correctValue}</td>
-                            <td className="py-1.5 text-center">
-                              {fr.correct ? (
-                                <span className="text-dhl-success font-bold">✓</span>
-                              ) : (
-                                <span className="text-dhl-error font-bold">✗</span>
-                              )}
-                            </td>
+                  <div className="border-t border-dhl-border px-3 md:px-4 py-2 md:py-3 overflow-x-auto">
+                    {/* Mobile: card layout / Desktop: table */}
+                    <div className="hidden md:block">
+                      <table className="w-full text-xs">
+                        <thead>
+                          <tr className="text-left text-gray-500 border-b">
+                            <th className="pb-2 font-medium">Field</th>
+                            <th className="pb-2 font-medium">Your Answer</th>
+                            <th className="pb-2 font-medium">Correct Answer</th>
+                            <th className="pb-2 font-medium text-center">Result</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody>
+                          {result.fieldResults.map((fr) => (
+                            <tr
+                              key={fr.field}
+                              className={`border-b last:border-0 ${fr.correct ? "" : "bg-red-50"}`}
+                            >
+                              <td className="py-1.5 font-medium text-gray-700">{fr.label}</td>
+                              <td className="py-1.5 text-gray-600">{fr.userValue || "—"}</td>
+                              <td className="py-1.5 text-gray-600">{fr.correctValue}</td>
+                              <td className="py-1.5 text-center">
+                                {fr.correct ? (
+                                  <span className="text-dhl-success font-bold">✓</span>
+                                ) : (
+                                  <span className="text-dhl-error font-bold">✗</span>
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* Mobile: stacked cards */}
+                    <div className="md:hidden space-y-2">
+                      {result.fieldResults.map((fr) => (
+                        <div
+                          key={fr.field}
+                          className={`p-2 rounded text-xs ${fr.correct ? "bg-green-50 border border-green-200" : "bg-red-50 border border-red-200"}`}
+                        >
+                          <div className="flex justify-between items-start mb-1">
+                            <span className="font-bold text-gray-700">{fr.label}</span>
+                            {fr.correct ? (
+                              <span className="text-dhl-success font-bold">✓</span>
+                            ) : (
+                              <span className="text-dhl-error font-bold">✗</span>
+                            )}
+                          </div>
+                          <div className="text-gray-600">
+                            <span className="text-gray-400">You: </span>{fr.userValue || "—"}
+                          </div>
+                          {!fr.correct && (
+                            <div className="text-gray-600 mt-0.5">
+                              <span className="text-gray-400">Correct: </span>{fr.correctValue}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
@@ -163,13 +193,13 @@ export default function ResultsPage() {
         </div>
 
         {/* Action Buttons */}
-        <div className="mt-8 flex items-center justify-center gap-4 pb-8">
+        <div className="mt-6 md:mt-8 flex flex-col sm:flex-row items-center justify-center gap-3 md:gap-4 pb-6 md:pb-8">
           <button
             onClick={() => {
               sessionStorage.removeItem("gameResults");
               router.push("/");
             }}
-            className="bg-dhl-dark text-white px-6 py-3 text-sm font-bold rounded hover:bg-gray-800 transition cursor-pointer"
+            className="w-full sm:w-auto bg-dhl-dark text-white px-6 py-3 text-sm font-bold rounded hover:bg-gray-800 transition cursor-pointer active:bg-gray-900"
           >
             BACK TO MENU
           </button>
@@ -178,7 +208,7 @@ export default function ResultsPage() {
               sessionStorage.removeItem("gameResults");
               router.push("/game");
             }}
-            className="bg-dhl-red text-white px-6 py-3 text-sm font-bold rounded hover:bg-red-700 transition cursor-pointer"
+            className="w-full sm:w-auto bg-dhl-red text-white px-6 py-3 text-sm font-bold rounded hover:bg-red-700 transition cursor-pointer active:bg-red-800"
           >
             RETRY TRAINING
           </button>
