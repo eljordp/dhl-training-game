@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import DHLHeader from "@/components/DHLHeader";
 import { scenarios } from "@/data/scenarios";
 
 export default function Home() {
@@ -13,83 +12,108 @@ export default function Home() {
 
   return (
     <div className="min-h-[100dvh] flex flex-col">
-      <DHLHeader />
+      {/* CRA 10 Header — exact match */}
+      <header className="bg-[#FFCC00] px-4 md:px-6 py-2 md:py-2.5 flex items-center gap-2 md:gap-3 flex-shrink-0 border-b border-[#e6b800]">
+        <div className="flex items-center">
+          <div className="bg-[#D40511] rounded-[4px] px-2 md:px-3 py-0.5 flex items-center">
+            <span
+              className="text-white font-black text-xl md:text-3xl italic tracking-tight leading-none"
+              style={{ fontFamily: "'Arial Black', 'Helvetica Neue', sans-serif" }}
+            >
+              DHL
+            </span>
+          </div>
+        </div>
+        <span className="text-[#1a1a1a] font-bold text-base md:text-xl tracking-tight">CRA 10</span>
+      </header>
 
-      <div className="flex-1 flex items-center justify-center px-3 md:px-4 py-4">
-        <div className="max-w-lg w-full">
-          {/* Hero Card */}
-          <div className="bg-white border border-dhl-border rounded-lg shadow-lg overflow-hidden">
-            {/* Top Banner */}
-            <div className="bg-dhl-red px-6 md:px-8 py-6 md:py-8 text-center">
-              <div className="bg-dhl-yellow text-dhl-dark font-black text-3xl md:text-4xl px-3 md:px-4 py-1.5 md:py-2 rounded inline-block mb-3 md:mb-4 tracking-wider">
-                DHL
-              </div>
-              <h1 className="text-white text-xl md:text-2xl font-bold">CRA Training Simulator</h1>
-              <p className="text-red-200 text-xs md:text-sm mt-1.5 md:mt-2">
-                Customer Receiving Application — Interactive Training
-              </p>
+      {/* Hero section with background */}
+      <div
+        className="flex-1 relative flex items-start md:items-center justify-center md:justify-start overflow-auto"
+        style={{
+          background: "linear-gradient(135deg, #2c2c2c 0%, #4a4a4a 40%, #D40511 60%, #FFCC00 100%)",
+        }}
+      >
+        {/* Dark overlay */}
+        <div className="absolute inset-0 bg-black/20" />
+
+        {/* Right side color wash (desktop) */}
+        <div className="absolute right-0 top-0 bottom-0 w-1/2 hidden md:block" style={{
+          background: "linear-gradient(to left, rgba(212,5,17,0.3), transparent)",
+        }} />
+
+        {/* Bottom DHL branding strip */}
+        <div className="absolute bottom-0 left-0 right-0 h-12 md:h-20" style={{
+          background: "linear-gradient(to right, #FFCC00 0%, #FFCC00 30%, #D40511 30%, #D40511 100%)",
+          opacity: 0.15,
+        }} />
+
+        {/* Floating card */}
+        <div className="relative z-10 w-full md:w-auto md:max-w-md mx-0 md:mx-12 lg:mx-20 my-0 md:my-8">
+          {/* Mobile: full width, flush edges / Desktop: floating card */}
+          <div className="bg-[#f2f2f2] md:bg-[#f2f2f2]/95 md:backdrop-blur-sm md:rounded-sm md:shadow-2xl min-h-[calc(100dvh-44px)] md:min-h-0 flex flex-col">
+            {/* Card header */}
+            <div className="px-5 md:px-8 pt-8 md:pt-8 pb-3 md:pb-4">
+              <h1 className="text-[#1a1a1a] text-xl md:text-2xl font-bold text-center">
+                CRA 10
+              </h1>
+              <p className="text-gray-500 text-xs text-center mt-1">Training Simulator</p>
             </div>
 
-            {/* Content */}
-            <div className="px-5 md:px-8 py-5 md:py-6">
-              <div className="space-y-3 md:space-y-4 mb-5 md:mb-6">
-                <div className="flex items-start gap-3">
-                  <div className="w-7 h-7 md:w-8 md:h-8 bg-dhl-yellow rounded-full flex items-center justify-center font-bold text-xs md:text-sm flex-shrink-0">1</div>
-                  <div>
-                    <div className="font-bold text-sm">Talk to Customers</div>
-                    <div className="text-xs text-gray-500">NPCs walk up with shipping requests. Read their info carefully.</div>
+            {/* Card body */}
+            <div className="px-5 md:px-8 pb-6 md:pb-8 flex-1 flex flex-col">
+              {/* Steps — styled like CRA form fields */}
+              <div className="space-y-4 mb-6">
+                <div>
+                  <label className="block text-[13px] text-[#333] mb-1.5 font-normal">
+                    1. Talk to Customers
+                  </label>
+                  <div className="bg-white border border-[#ccc] rounded-[2px] px-3 py-2.5 text-xs text-gray-500">
+                    NPCs walk up with shipping requests. Read their info carefully.
                   </div>
                 </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-7 h-7 md:w-8 md:h-8 bg-dhl-yellow rounded-full flex items-center justify-center font-bold text-xs md:text-sm flex-shrink-0">2</div>
-                  <div>
-                    <div className="font-bold text-sm">Fill Out the CRA Form</div>
-                    <div className="text-xs text-gray-500">Enter sender, receiver, and shipment details — just like the real system.</div>
+                <div>
+                  <label className="block text-[13px] text-[#333] mb-1.5 font-normal">
+                    2. Fill Out the CRA Form
+                  </label>
+                  <div className="bg-white border border-[#ccc] rounded-[2px] px-3 py-2.5 text-xs text-gray-500">
+                    Enter sender, receiver, and shipment details — just like the real system.
                   </div>
                 </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-7 h-7 md:w-8 md:h-8 bg-dhl-yellow rounded-full flex items-center justify-center font-bold text-xs md:text-sm flex-shrink-0">3</div>
-                  <div>
-                    <div className="font-bold text-sm">Get Graded</div>
-                    <div className="text-xs text-gray-500">See which fields you got right and wrong. Learn from mistakes.</div>
+                <div>
+                  <label className="block text-[13px] text-[#333] mb-1.5 font-normal">
+                    3. Get Graded
+                  </label>
+                  <div className="bg-white border border-[#ccc] rounded-[2px] px-3 py-2.5 text-xs text-gray-500">
+                    See which fields you got right and wrong. Learn from your mistakes.
                   </div>
                 </div>
               </div>
 
-              {/* Scenario Stats */}
-              <div className="flex justify-center gap-3 md:gap-4 mb-5 md:mb-6">
-                <div className="text-center">
-                  <div className="text-base md:text-lg font-black text-dhl-dark">{scenarios.length}</div>
-                  <div className="text-[9px] md:text-[10px] text-gray-500 font-medium">SCENARIOS</div>
-                </div>
-                <div className="h-8 w-px bg-gray-200" />
-                <div className="text-center">
-                  <div className="text-base md:text-lg font-black text-green-600">{beginnerCount}</div>
-                  <div className="text-[9px] md:text-[10px] text-gray-500 font-medium">EASY</div>
-                </div>
-                <div className="h-8 w-px bg-gray-200" />
-                <div className="text-center">
-                  <div className="text-base md:text-lg font-black text-yellow-600">{intermediateCount}</div>
-                  <div className="text-[9px] md:text-[10px] text-gray-500 font-medium">MEDIUM</div>
-                </div>
-                <div className="h-8 w-px bg-gray-200" />
-                <div className="text-center">
-                  <div className="text-base md:text-lg font-black text-red-600">{advancedCount}</div>
-                  <div className="text-[9px] md:text-[10px] text-gray-500 font-medium">HARD</div>
-                </div>
+              {/* Checkbox row — matches CRA "Remember Me" / "Use default" style */}
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-6">
+                <label className="flex items-center gap-1.5 cursor-pointer">
+                  <input type="checkbox" checked readOnly className="accent-[#D40511] w-4 h-4" />
+                  <span className="text-[13px] text-[#333]">{scenarios.length} Scenarios</span>
+                </label>
+                <label className="flex items-center gap-1.5 cursor-pointer">
+                  <input type="checkbox" checked readOnly className="accent-[#D40511] w-4 h-4" />
+                  <span className="text-[13px] text-[#333]">
+                    {beginnerCount} Easy / {intermediateCount} Med / {advancedCount} Hard
+                  </span>
+                </label>
               </div>
 
-              {/* Start Button */}
+              {/* Start button — yellow, matches CRA "Ingresar/Login" */}
               <button
                 onClick={() => router.push("/game")}
-                className="w-full bg-dhl-red text-white py-3 md:py-3 text-base md:text-lg font-bold rounded hover:bg-red-700 transition cursor-pointer active:bg-red-800"
+                className="bg-[#FFCC00] hover:bg-[#e6b800] active:bg-[#cca300] text-[#1a1a1a] border border-[#cca300] rounded-[3px] px-6 py-3 md:py-2.5 text-sm font-bold cursor-pointer transition w-full md:w-auto"
               >
-                START TRAINING
+                Ingresar/Start Training
               </button>
 
-              <p className="text-center text-[10px] text-gray-400 mt-2 md:mt-3">
-                Ship to Mexico, Germany, Japan, UK, Brazil & Australia
-              </p>
+              {/* Spacer for mobile */}
+              <div className="flex-1 md:hidden" />
             </div>
           </div>
         </div>
