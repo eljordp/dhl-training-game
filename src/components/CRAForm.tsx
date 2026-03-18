@@ -81,8 +81,8 @@ function CraInput({
       </label>
       <input
         type={type}
-        className={`w-full bg-white border rounded-sm px-2 py-1 focus:outline-none focus:border-[#D40511] ${inputBorderClass(result)} disabled:bg-gray-100 disabled:text-gray-400`}
-        style={{ fontSize: "13px", fontFamily: "Arial, sans-serif" }}
+        className={`w-full bg-white border rounded-sm px-2 py-2.5 md:py-1 focus:outline-none focus:border-[#D40511] text-base md:text-[13px] ${inputBorderClass(result)} disabled:bg-gray-100 disabled:text-gray-400`}
+        style={{ fontFamily: "Arial, sans-serif" }}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
@@ -119,8 +119,8 @@ function CraSelect({
         {label}{required && <span style={{ color: "#D40511" }}> *</span>}
       </label>
       <select
-        className={`w-full bg-white border rounded-sm px-2 py-1 focus:outline-none focus:border-[#D40511] ${inputBorderClass(result)} disabled:bg-gray-100 disabled:text-gray-400`}
-        style={{ fontSize: "13px", fontFamily: "Arial, sans-serif" }}
+        className={`w-full bg-white border rounded-sm px-2 py-2.5 md:py-1 focus:outline-none focus:border-[#D40511] text-base md:text-[13px] ${inputBorderClass(result)} disabled:bg-gray-100 disabled:text-gray-400`}
+        style={{ fontFamily: "Arial, sans-serif" }}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
@@ -186,11 +186,11 @@ function AddItemModal({ item, onSave, onCancel, isEdit }: AddItemModalProps) {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label style={{ fontSize: "12px", color: "#333", display: "block", marginBottom: "2px" }}>Quantity <span style={{ color: "#D40511" }}>*</span></label>
-              <input type="number" min="1" className="w-full border border-gray-300 rounded-sm px-2 py-1 text-sm" value={qty} onChange={(e) => setQty(e.target.value)} />
+              <input type="number" min="1" className="w-full border border-gray-300 rounded-sm px-2 py-2.5 md:py-1 text-base md:text-sm" value={qty} onChange={(e) => setQty(e.target.value)} />
             </div>
             <div>
               <label style={{ fontSize: "12px", color: "#333", display: "block", marginBottom: "2px" }}>Unit <span style={{ color: "#D40511" }}>*</span></label>
-              <select className="w-full border border-gray-300 rounded-sm px-2 py-1 text-sm" value={unit} onChange={(e) => setUnit(e.target.value)}>
+              <select className="w-full border border-gray-300 rounded-sm px-2 py-2.5 md:py-1 text-base md:text-sm" value={unit} onChange={(e) => setUnit(e.target.value)}>
                 <option>Piece</option>
                 <option>Box</option>
                 <option>Set</option>
@@ -201,20 +201,20 @@ function AddItemModal({ item, onSave, onCancel, isEdit }: AddItemModalProps) {
           </div>
           <div>
             <label style={{ fontSize: "12px", color: "#333", display: "block", marginBottom: "2px" }}>Country of Origin <span style={{ color: "#D40511" }}>*</span></label>
-            <select className="w-full border border-gray-300 rounded-sm px-2 py-1 text-sm" value={coo} onChange={(e) => setCoo(e.target.value)}>
+            <select className="w-full border border-gray-300 rounded-sm px-2 py-2.5 md:py-1 text-base md:text-sm" value={coo} onChange={(e) => setCoo(e.target.value)}>
               <option value="">Select...</option>
               {COUNTRY_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.value} - {o.label}</option>)}
             </select>
           </div>
           <div>
             <label style={{ fontSize: "12px", color: "#333", display: "block", marginBottom: "2px" }}>Description <span style={{ color: "#D40511" }}>*</span></label>
-            <input type="text" className="w-full border border-gray-300 rounded-sm px-2 py-1 text-sm" value={desc} onChange={(e) => setDesc(e.target.value)} />
+            <input type="text" className="w-full border border-gray-300 rounded-sm px-2 py-2.5 md:py-1 text-base md:text-sm" value={desc} onChange={(e) => setDesc(e.target.value)} />
           </div>
           <div className="relative">
             <label style={{ fontSize: "12px", color: "#333", display: "block", marginBottom: "2px" }}>Commodity</label>
             <input
               type="text"
-              className="w-full border border-gray-300 rounded-sm px-2 py-1 text-sm"
+              className="w-full border border-gray-300 rounded-sm px-2 py-2.5 md:py-1 text-base md:text-sm"
               value={commodity}
               onChange={(e) => { setCommodity(e.target.value); setShowSuggestions(true); }}
               onFocus={() => setShowSuggestions(true)}
@@ -222,11 +222,11 @@ function AddItemModal({ item, onSave, onCancel, isEdit }: AddItemModalProps) {
               placeholder="Type to search..."
             />
             {showSuggestions && filtered.length > 0 && (
-              <div className="absolute z-10 w-full bg-white border border-gray-300 rounded shadow-sm max-h-32 overflow-y-auto">
+              <div className="absolute z-10 w-full bg-white border border-gray-300 rounded shadow-sm max-h-40 overflow-y-auto">
                 {filtered.map((s) => (
                   <div
                     key={s}
-                    className="px-2 py-1 text-xs hover:bg-yellow-50 cursor-pointer"
+                    className="px-3 py-2.5 md:py-1.5 text-sm md:text-xs hover:bg-yellow-50 cursor-pointer"
                     onMouseDown={() => { setCommodity(s); setShowSuggestions(false); }}
                   >{s}</div>
                 ))}
@@ -236,11 +236,11 @@ function AddItemModal({ item, onSave, onCancel, isEdit }: AddItemModalProps) {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label style={{ fontSize: "12px", color: "#333", display: "block", marginBottom: "2px" }}>Total Weight (lb) <span style={{ color: "#D40511" }}>*</span></label>
-              <input type="number" min="0" step="0.1" className="w-full border border-gray-300 rounded-sm px-2 py-1 text-sm" value={weight} onChange={(e) => setWeight(e.target.value)} />
+              <input type="number" min="0" step="0.1" className="w-full border border-gray-300 rounded-sm px-2 py-2.5 md:py-1 text-base md:text-sm" value={weight} onChange={(e) => setWeight(e.target.value)} />
             </div>
             <div>
               <label style={{ fontSize: "12px", color: "#333", display: "block", marginBottom: "2px" }}>Unit Value (USD) <span style={{ color: "#D40511" }}>*</span></label>
-              <input type="number" min="0" step="0.01" className="w-full border border-gray-300 rounded-sm px-2 py-1 text-sm" value={unitValue} onChange={(e) => setUnitValue(e.target.value)} />
+              <input type="number" min="0" step="0.01" className="w-full border border-gray-300 rounded-sm px-2 py-2.5 md:py-1 text-base md:text-sm" value={unitValue} onChange={(e) => setUnitValue(e.target.value)} />
             </div>
           </div>
           <div className="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded text-sm">
