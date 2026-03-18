@@ -22,7 +22,7 @@ export default function Home() {
             DHL
           </span>
         </div>
-        <span className="text-[#1a1a1a] font-bold text-base md:text-xl tracking-tight">CRA 10</span>
+        <span className="text-[#1a1a1a] font-bold text-base md:text-xl tracking-tight">Training Simulator</span>
       </header>
 
       {/* White page body */}
@@ -32,8 +32,7 @@ export default function Home() {
           <div className="bg-[#f2f2f2] border border-[#ddd] rounded-sm shadow-sm">
             {/* Card header */}
             <div className="px-6 md:px-8 pt-7 pb-3">
-              <h1 className="text-[#1a1a1a] text-xl md:text-2xl font-bold text-center">CRA 10</h1>
-              <p className="text-gray-500 text-xs text-center mt-1">Training Simulator</p>
+              <h1 className="text-[#1a1a1a] text-xl md:text-2xl font-bold text-center">DHL Training Simulator</h1>
             </div>
 
             {/* Card body */}
