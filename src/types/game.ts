@@ -94,4 +94,6 @@ export interface ScenarioResult {
   correctFields: number;
   fieldResults: FieldResult[];
   timeSpent: number;
+  xpEarned?: number;
+  bonusXp?: number; // speed + perfect bonuses
 }

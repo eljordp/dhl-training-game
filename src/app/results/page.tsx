@@ -23,6 +23,30 @@ export default function ResultsPage() {
     ? Math.round(results.reduce((sum, r) => sum + r.score, 0) / results.length)
     : 0;
 
+  const totalXP = results.reduce((sum, r) => sum + (r.xpEarned || 0), 0);
+
+  function getLevel(xp: number): { name: string; icon: string; next: number } {
+    if (xp >= 600) return { name: "Expert", icon: "🏆", next: 0 };
+    if (xp >= 350) return { name: "Senior Agent", icon: "⭐", next: 600 };
+    if (xp >= 150) return { name: "Agent", icon: "🏅", next: 350 };
+    return { name: "Trainee", icon: "🎓", next: 150 };
+  }
+
+  function getBadges(rs: ScenarioResult[]): { icon: string; label: string }[] {
+    const badges: { icon: string; label: string }[] = [];
+    if (rs.length > 0) badges.push({ icon: "🚀", label: "First Shipment" });
+    if (rs.some(r => r.score === 100)) badges.push({ icon: "💎", label: "Perfect Run" });
+    if (rs.some(r => r.timeSpent < 60)) badges.push({ icon: "⚡", label: "Speed Demon" });
+    if (rs.every(r => r.score === 100)) badges.push({ icon: "🔥", label: "Flawless" });
+    let maxStreak = 0, cur = 0;
+    for (const r of rs) { if (r.score >= 80) { cur++; maxStreak = Math.max(maxStreak, cur); } else cur = 0; }
+    if (maxStreak >= 3) badges.push({ icon: "🎯", label: "Hot Streak" });
+    return badges;
+  }
+
+  const level = getLevel(totalXP);
+  const badges = getBadges(results);
+
   const totalCorrect = results.reduce((sum, r) => sum + r.correctFields, 0);
   const totalFields = results.reduce((sum, r) => sum + r.totalFields, 0);
   const totalTime = results.reduce((sum, r) => sum + r.timeSpent, 0);
@@ -93,6 +117,46 @@ export default function ResultsPage() {
             {overallScore >= 60 && overallScore < 80 && "Needs improvement. Review missed fields."}
             {overallScore < 60 && "Additional training recommended."}
           </div>
+        </div>
+
+        {/* XP & Level Card */}
+        <div className="bg-white border border-dhl-border rounded-lg shadow-sm mb-4 md:mb-6 overflow-hidden">
+          <div className="px-4 md:px-6 py-3 md:py-4 flex flex-col sm:flex-row items-center gap-4">
+            {/* Level */}
+            <div className="text-center">
+              <div className="text-3xl mb-1">{level.icon}</div>
+              <div className="text-sm font-bold text-dhl-dark">{level.name}</div>
+            </div>
+
+            {/* XP Bar */}
+            <div className="flex-1 w-full">
+              <div className="flex justify-between text-xs text-gray-500 mb-1">
+                <span className="font-bold text-dhl-dark">{totalXP} XP earned</span>
+                {level.next > 0 && <span>{level.next - totalXP} XP to next level</span>}
+                {level.next === 0 && <span className="text-yellow-600 font-bold">MAX LEVEL</span>}
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-3">
+                <div
+                  className="bg-dhl-yellow h-3 rounded-full transition-all"
+                  style={{ width: `${level.next > 0 ? Math.min(100, (totalXP / level.next) * 100) : 100}%` }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Badges */}
+          {badges.length > 0 && (
+            <div className="border-t border-dhl-border px-4 md:px-6 py-2 md:py-3">
+              <div className="text-xs text-gray-500 font-medium mb-2 uppercase tracking-wide">Badges Earned</div>
+              <div className="flex flex-wrap gap-2">
+                {badges.map((b) => (
+                  <span key={b.label} className="flex items-center gap-1 bg-dhl-yellow/20 border border-dhl-yellow rounded-full px-3 py-1 text-xs font-bold">
+                    {b.icon} {b.label}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Individual Scenario Results */}
@@ -202,6 +266,12 @@ export default function ResultsPage() {
             className="w-full sm:w-auto bg-dhl-dark text-white px-6 py-3 text-sm font-bold rounded hover:bg-gray-800 transition cursor-pointer active:bg-gray-900"
           >
             BACK TO MENU
+          </button>
+          <button
+            onClick={() => router.push("/quiz")}
+            className="w-full sm:w-auto bg-dhl-yellow text-dhl-dark px-6 py-3 text-sm font-bold rounded hover:bg-yellow-400 transition cursor-pointer"
+          >
+            TAKE QUIZ →
           </button>
           <button
             onClick={() => {

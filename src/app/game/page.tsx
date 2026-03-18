@@ -218,6 +218,15 @@ function ProductsModal({ form, correctServiceType, onSelect, onCancel }: Product
   );
 }
 
+// --- XP Calculation ---
+function calcXP(score: number, timeSpent: number): { base: number; bonus: number; total: number } {
+  const base = score;
+  const speedBonus = timeSpent < 60 ? 20 : timeSpent < 120 ? 10 : timeSpent < 180 ? 5 : 0;
+  const perfectBonus = score === 100 ? 25 : 0;
+  const bonus = speedBonus + perfectBonus;
+  return { base, bonus, total: base + bonus };
+}
+
 // --- Main GamePage ---
 export default function GamePage() {
   const router = useRouter();
@@ -240,7 +249,9 @@ export default function GamePage() {
       shipmentInfo: { ...form.shipmentInfo, serviceType },
     };
     const timeSpent = Math.round((Date.now() - scenarioStartTime) / 1000);
-    const result = gradeScenario(scenario, finalForm, timeSpent);
+    const graded = gradeScenario(scenario, finalForm, timeSpent);
+    const xp = calcXP(graded.score, timeSpent);
+    const result: ScenarioResult = { ...graded, xpEarned: xp.total, bonusXp: xp.bonus };
     const newResults = [...results, result];
     setResults(newResults);
     setFieldResults(getFieldResultMap(result.fieldResults));
@@ -299,6 +310,15 @@ export default function GamePage() {
             {lastResult.score >= 80 && lastResult.score < 100 && " — Great job!"}
             {lastResult.score >= 50 && lastResult.score < 80 && " — Needs work"}
             {lastResult.score < 50 && " — Review carefully"}
+            {lastResult.xpEarned != null && (
+              <>
+                {" — "}
+                <span className="font-bold text-yellow-600">+{lastResult.xpEarned} XP ⚡</span>
+                {(lastResult.bonusXp ?? 0) > 0 && (
+                  <span className="ml-1 font-bold text-yellow-500">+{lastResult.bonusXp} BONUS</span>
+                )}
+              </>
+            )}
           </span>
         </div>
       )}
