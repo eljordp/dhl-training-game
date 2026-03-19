@@ -9,6 +9,7 @@ function toEmail(username: string) {
 
 export async function signIn(username: string, password: string) {
   const supabase = createClient();
+  if (!supabase) return { data: null, error: { message: "Auth not configured" } };
   const { data, error } = await supabase.auth.signInWithPassword({
     email: toEmail(username),
     password,
@@ -18,11 +19,13 @@ export async function signIn(username: string, password: string) {
 
 export async function signOut() {
   const supabase = createClient();
+  if (!supabase) return;
   await supabase.auth.signOut();
 }
 
 export async function getProfile(): Promise<UserProfile | null> {
   const supabase = createClient();
+  if (!supabase) return null;
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -39,6 +42,7 @@ export async function getProfile(): Promise<UserProfile | null> {
 
 export async function getCurrentUser() {
   const supabase = createClient();
+  if (!supabase) return null;
   const {
     data: { user },
   } = await supabase.auth.getUser();

@@ -303,6 +303,7 @@ export default function ManagerDashboard() {
 
     (async () => {
       const supabase = createClient();
+      if (!supabase) return;
 
       const [profilesRes, attemptsRes, quizRes] = await Promise.all([
         supabase.from("profiles").select("*").eq("role", "employee"),
@@ -352,6 +353,7 @@ export default function ManagerDashboard() {
       setPassword("");
       // Refresh employee list
       const supabase = createClient();
+      if (!supabase) return;
       const { data: profiles } = await supabase.from("profiles").select("*").eq("role", "employee");
       const allAttempts = employees.flatMap((e) => e.attempts);
       const allQuiz = employees.flatMap((e) => e.quizAttempts);

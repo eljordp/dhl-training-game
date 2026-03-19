@@ -7,6 +7,7 @@ export async function saveScenarioAttempt(
   difficulty: string
 ): Promise<void> {
   const supabase = createClient();
+  if (!supabase) return;
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return; // not logged in, skip silently
 
@@ -50,6 +51,7 @@ export async function saveQuizAttempt(
   questionResults: { questionId: string; category: string; correct: boolean; userAnswer: number }[]
 ): Promise<void> {
   const supabase = createClient();
+  if (!supabase) return;
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
 
