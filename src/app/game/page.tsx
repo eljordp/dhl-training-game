@@ -8,6 +8,7 @@ import CRAForm from "@/components/CRAForm";
 import { scenarios } from "@/data/scenarios";
 import { gradeScenario, getFieldResultMap } from "@/data/grading";
 import { ShipmentForm, ScenarioResult } from "@/types/game";
+import { saveScenarioAttempt } from "@/lib/tracking";
 
 function emptyForm(): ShipmentForm {
   return {
@@ -267,6 +268,12 @@ export default function GamePage() {
     if (currentIndex + 1 >= scenarios.length) {
       const allResults = [...results];
       sessionStorage.setItem("gameResults", JSON.stringify(allResults));
+      // Save all results to Supabase (fire and forget — don't await to avoid blocking)
+      Promise.all(
+        allResults.map((result, idx) =>
+          saveScenarioAttempt(result, scenarios[idx].id, scenarios[idx].difficulty)
+        )
+      ).catch(() => {}); // fail silently if not logged in
       router.push("/results");
     } else {
       setCurrentIndex((prev) => prev + 1);

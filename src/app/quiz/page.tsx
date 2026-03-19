@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import DHLHeader from "@/components/DHLHeader";
 import { quizQuestions } from "@/data/quizQuestions";
 import { QuizSession } from "@/types/quiz";
+import { saveQuizAttempt } from "@/lib/tracking";
 
 function shuffleArray<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -93,6 +94,24 @@ export default function QuizPage() {
     if (!revealed) return;
 
     if (isLast) {
+      const timeSpent = Math.round((Date.now() - session.startTime) / 1000);
+      const questionResults = session.questions.map((q, i) => ({
+        questionId: q.id,
+        category: q.category,
+        correct: session.answers[i] === q.correct,
+        userAnswer: session.answers[i] ?? -1,
+      }));
+      const correctCount = questionResults.filter(r => r.correct).length;
+      const scorePercent = Math.round((correctCount / session.questions.length) * 100);
+
+      saveQuizAttempt(
+        scorePercent,
+        session.questions.length,
+        correctCount,
+        timeSpent,
+        questionResults
+      ).catch(() => {}); // fail silently if not logged in
+
       setSession((prev) => ({ ...prev, completed: true }));
       return;
     }
