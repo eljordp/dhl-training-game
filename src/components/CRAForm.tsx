@@ -17,6 +17,29 @@ type TabId = "shipmentInfo" | "shipperConsignee" | "pickupBooking" | "party" | "
 const COUNTRY_OPTIONS = COUNTRIES.map((c) => ({ value: c.code, label: c.name }))
   .sort((a, b) => a.label.localeCompare(b.label));
 
+const PHONE_CODES: Record<string, string> = {
+  US: "+1", CA: "+1", MX: "+52", GT: "+502", SV: "+503", HN: "+504", NI: "+505", CR: "+506", PA: "+507",
+  CO: "+57", VE: "+58", EC: "+593", PE: "+51", BR: "+55", CL: "+56", AR: "+54", BO: "+591", PY: "+595", UY: "+598",
+  GB: "+44", DE: "+49", FR: "+33", ES: "+34", IT: "+39", PT: "+351", NL: "+31", BE: "+32", AT: "+43", CH: "+41",
+  SE: "+46", NO: "+47", DK: "+45", FI: "+358", PL: "+48", CZ: "+420", RO: "+40", GR: "+30", IE: "+353",
+  HR: "+385", HU: "+36", BG: "+359", SK: "+421", SI: "+386", RS: "+381", BA: "+387", MK: "+389", ME: "+382",
+  LT: "+370", LV: "+371", EE: "+372",
+  JP: "+81", CN: "+86", KR: "+82", IN: "+91", PH: "+63", ID: "+62", TH: "+66", VN: "+84", MY: "+60", SG: "+65",
+  AU: "+61", NZ: "+64", HK: "+852", TW: "+886", BD: "+880", PK: "+92", LK: "+94", NP: "+977",
+  EG: "+20", ZA: "+27", NG: "+234", KE: "+254", GH: "+233", ET: "+251", TZ: "+255", UG: "+256",
+  SA: "+966", AE: "+971", JO: "+962", LB: "+961", IQ: "+964", KW: "+965", QA: "+974", BH: "+973", OM: "+968",
+  IL: "+972", TR: "+90", IR: "+98", SY: "+963",
+  RU: "+7", UA: "+380", BY: "+375", GE: "+995", AM: "+374", AZ: "+994", KZ: "+7", UZ: "+998", KG: "+996",
+  DO: "+1", JM: "+1", TT: "+1", BB: "+1", BS: "+1", HT: "+509", BZ: "+501", GY: "+592", SR: "+597",
+  MA: "+212", TN: "+216", DZ: "+213", LY: "+218", SD: "+249", SN: "+221", CM: "+237", CI: "+225",
+  MN: "+976", KH: "+855", LA: "+856", MM: "+95", BN: "+673", FJ: "+679", PG: "+675",
+  IS: "+354", LU: "+352", MT: "+356", CY: "+357", AL: "+355", MD: "+373",
+};
+
+function getPhoneCode(countryCode: string): string {
+  return PHONE_CODES[countryCode] || "+1";
+}
+
 const COMMODITY_SUGGESTIONS = [
   "8517130000 SMARTPHONES",
   "8471300000 PORTABLE DIGITAL ADP MACHINES",
@@ -558,12 +581,7 @@ export default function CRAForm({ form, onChange, fieldResults, disabled, onSave
             <div className="bg-white border border-gray-200 p-3 rounded-sm">
               <div style={{ fontSize: "13px", fontWeight: "bold", color: "#222", marginBottom: "10px" }}>Pieces</div>
 
-              <div className="mb-2">
-                <CraInput label="Search Type" value="" onChange={() => {}} disabled={disabled} />
-              </div>
-              <div className="mb-3">
-                <CraInput label="ID" value="" onChange={() => {}} disabled={disabled} />
-              </div>
+              {/* Search Type and ID removed — not used in training */}
 
               {/* Pieces input row */}
               <div className="grid grid-cols-3 gap-1.5 mb-2">
@@ -752,7 +770,7 @@ export default function CRAForm({ form, onChange, fieldResults, disabled, onSave
                 <div>
                   <label style={{ fontSize: "12px", color: "#333", display: "block", marginBottom: "2px" }}>Phone 1 <span style={{ color: "#D40511" }}>*</span></label>
                   <div className="flex gap-1">
-                    <span className="border border-gray-300 rounded-sm px-2 py-1 bg-gray-100 text-gray-500 text-xs flex items-center">+1</span>
+                    <span className="border border-gray-300 rounded-sm px-2 py-1 bg-gray-100 text-gray-500 text-xs flex items-center">{getPhoneCode(form.shipmentInfo.destinationCountry)}</span>
                     <input
                       type="text"
                       className={`flex-1 bg-white border rounded-sm px-2 py-1 focus:outline-none focus:border-[#D40511] ${inputBorderClass(fr["consignee.phone"])} disabled:bg-gray-100`}
