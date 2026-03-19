@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ShipmentForm, InvoiceItem } from "@/types/game";
+import { COUNTRIES } from "@/data/countries";
 
 interface CRAFormProps {
   form: ShipmentForm;
@@ -13,23 +14,8 @@ interface CRAFormProps {
 
 type TabId = "shipmentInfo" | "shipperConsignee" | "pickupBooking" | "party" | "customs" | "commercialInvoice";
 
-const COUNTRY_OPTIONS = [
-  { value: "US", label: "United States" },
-  { value: "MX", label: "Mexico" },
-  { value: "CA", label: "Canada" },
-  { value: "GB", label: "United Kingdom" },
-  { value: "DE", label: "Germany" },
-  { value: "FR", label: "France" },
-  { value: "JP", label: "Japan" },
-  { value: "CN", label: "China" },
-  { value: "AU", label: "Australia" },
-  { value: "BR", label: "Brazil" },
-  { value: "KR", label: "South Korea" },
-  { value: "IN", label: "India" },
-  { value: "IT", label: "Italy" },
-  { value: "ES", label: "Spain" },
-  { value: "NL", label: "Netherlands" },
-];
+const COUNTRY_OPTIONS = COUNTRIES.map((c) => ({ value: c.code, label: c.name }))
+  .sort((a, b) => a.label.localeCompare(b.label));
 
 const COMMODITY_SUGGESTIONS = [
   "8517130000 SMARTPHONES",

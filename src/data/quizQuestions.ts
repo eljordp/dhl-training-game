@@ -160,5 +160,86 @@ export const quizQuestions: QuizQuestion[] = [
     options: ["25 lbs (one box only)", "50 lbs (combined total)", "Either is acceptable", "Depends on the carrier service"],
     correct: 1,
     explanation: "Always enter the TOTAL combined weight of all pieces. 2 boxes × 25 lbs = 50 lbs."
+  },
+  // ── New country code questions (Oak Lawn real-world destinations) ──
+  {
+    id: "q21",
+    category: "country_codes",
+    question: "What is Guatemala's DHL country code?",
+    options: ["GU", "GTA", "GT", "GA"],
+    correct: 2,
+    explanation: "GT is the ISO 3166-1 country code for Guatemala. (GU is Guam — don't confuse them!)"
+  },
+  {
+    id: "q22",
+    category: "country_codes",
+    question: "What is Canada's DHL country code?",
+    options: ["CN", "CAN", "CA", "CD"],
+    correct: 2,
+    explanation: "CA is the ISO 3166-1 country code for Canada. (CN is China — easy mix-up!)"
+  },
+  {
+    id: "q23",
+    category: "country_codes",
+    question: "What is Colombia's DHL country code?",
+    options: ["CL", "CB", "CM", "CO"],
+    correct: 3,
+    explanation: "CO is the country code for Colombia. CL is Chile — a very common mix-up."
+  },
+  {
+    id: "q24",
+    category: "country_codes",
+    question: "What is El Salvador's DHL country code?",
+    options: ["ES", "SV", "SA", "SL"],
+    correct: 1,
+    explanation: "SV is the country code for El Salvador (El Salvador in Spanish, Salvadoria). ES is Spain."
+  },
+  {
+    id: "q25",
+    category: "country_codes",
+    question: "What is Jordan's DHL country code?",
+    options: ["JO", "JR", "JD", "JN"],
+    correct: 0,
+    explanation: "JO is the ISO 3166-1 country code for Jordan (Hashemite Kingdom of Jordan)."
+  },
+  {
+    id: "q26",
+    category: "country_codes",
+    question: "What is the Philippines' DHL country code?",
+    options: ["PI", "PL", "PH", "RP"],
+    correct: 2,
+    explanation: "PH is the ISO 3166-1 country code for the Philippines."
+  },
+  {
+    id: "q27",
+    category: "general",
+    question: "A customer sends immigration documents to a Canadian government office. The 'Residential Address' checkbox should be:",
+    options: ["Checked — all Canadian addresses are residential", "Unchecked — a government office is not residential", "Checked — any personal document is residential", "Left blank — only applies to packages"],
+    correct: 1,
+    explanation: "Government offices, businesses, and institutions are NOT residential. Only check residential for actual home addresses."
+  },
+  {
+    id: "q28",
+    category: "general",
+    question: "A customer ships a tablet computer ($500) and clothing ($150) in one box. What declared value do you enter?",
+    options: ["$500 (electronics only)", "$150 (clothing only)", "$650 (total combined value)", "$500 (highest-value item only)"],
+    correct: 2,
+    explanation: "Declared value must be the TOTAL value of all contents in the shipment: $500 + $150 = $650."
+  },
+  {
+    id: "q29",
+    category: "customs",
+    question: "What is the HS (harmonized) code for tablet computers and portable laptops?",
+    options: ["6110", "8517", "8471.30", "6204"],
+    correct: 2,
+    explanation: "8471.30 covers portable Automatic Data Processing machines — laptops, tablets, notebooks."
+  },
+  {
+    id: "q30",
+    category: "general",
+    question: "A customer sends a package to the Philippines — their family lives at a home address. The 'Residential Address' checkbox should be:",
+    options: ["Unchecked — international addresses are never residential", "Checked — their family lives at a home address", "Left blank — only for domestic shipments", "Depends on the value of the package"],
+    correct: 1,
+    explanation: "If the consignee lives at a home (not a business or office), the Residential Address checkbox must be checked — regardless of the destination country."
   }
 ];
