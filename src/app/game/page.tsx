@@ -94,8 +94,8 @@ function ProductCard({ product, weight, isCorrect, onSelect }: ProductCardProps)
 
   return (
     <div
-      className="border rounded-sm overflow-hidden flex flex-col"
-      style={{ borderColor: isCorrect ? "#FFCC00" : "#ccc", borderWidth: isCorrect ? "2px" : "1px", minWidth: "220px" }}
+      className="border rounded-sm overflow-hidden flex flex-col min-w-0 md:min-w-[220px]"
+      style={{ borderColor: isCorrect ? "#FFCC00" : "#ccc", borderWidth: isCorrect ? "2px" : "1px" }}
     >
       <div className="px-3 py-2" style={{ background: isCorrect ? "#FFCC00" : "#f5f5f5", borderBottom: "1px solid #ccc" }}>
         <div style={{ fontWeight: "bold", fontSize: "13px" }}>{product.name}</div>
@@ -185,7 +185,7 @@ function ProductsModal({ form, correctServiceType, onSelect, onCancel }: Product
         </div>
 
         {/* Product cards */}
-        <div className="p-4 flex gap-4 overflow-x-auto">
+        <div className="p-4 flex flex-col md:flex-row gap-4 overflow-x-auto">
           <ProductCard
             product={primary}
             weight={weight}

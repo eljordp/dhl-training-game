@@ -1,6 +1,7 @@
 import { QuizQuestion } from "@/types/quiz";
 
 export const quizQuestions: QuizQuestion[] = [
+  // ── Document vs Package ──
   {
     id: "q1",
     category: "document_vs_package",
@@ -11,22 +12,6 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "q2",
-    category: "country_codes",
-    question: "What is Germany's DHL country code?",
-    options: ["GE", "GM", "DE", "GR"],
-    correct: 2,
-    explanation: "DE is the ISO 3166-1 country code for Germany (Deutschland)."
-  },
-  {
-    id: "q3",
-    category: "service_types",
-    question: "A customer says their documents must arrive at the destination office by 9:00 AM. Which service do you select?",
-    options: ["EXPRESS_WORLDWIDE", "EXPRESS_12:00", "ECONOMY_SELECT", "EXPRESS_9:00"],
-    correct: 3,
-    explanation: "EXPRESS_9:00 guarantees delivery by 9:00 AM on the next business day."
-  },
-  {
-    id: "q4",
     category: "document_vs_package",
     question: "When is a Commercial Invoice NOT required?",
     options: ["When shipping to Mexico", "When the package is under $100", "When shipping DOCUMENTS", "When the customer is a private individual"],
@@ -34,15 +19,25 @@ export const quizQuestions: QuizQuestion[] = [
     explanation: "DOCUMENT shipments skip the Commercial Invoice tab entirely. It is only required for PACKAGE content type."
   },
   {
-    id: "q5",
-    category: "general",
-    question: "A customer brings 2 separate boxes to ship to Japan. What number goes in 'Number of Pieces'?",
-    options: ["1", "2", "The total item count inside the boxes", "Leave blank"],
-    correct: 1,
-    explanation: "Number of Pieces refers to the number of physical boxes/parcels, not items inside. The customer has 2 boxes = 2 pieces."
+    id: "q3",
+    category: "document_vs_package",
+    question: "What declared value should you enter for a DOCUMENT shipment (internal legal papers)?",
+    options: ["The paper's printing cost", "The document's legal value", "0 — documents have no commercial value", "Whatever the customer states"],
+    correct: 2,
+    explanation: "Internal documents have no commercial/resale value. Declared value = 0."
+  },
+
+  // ── Country Codes (6 total) ──
+  {
+    id: "q4",
+    category: "country_codes",
+    question: "What is Germany's DHL country code?",
+    options: ["GE", "GM", "DE", "GR"],
+    correct: 2,
+    explanation: "DE is the ISO 3166-1 country code for Germany (Deutschland)."
   },
   {
-    id: "q6",
+    id: "q5",
     category: "country_codes",
     question: "What is Japan's DHL country code?",
     options: ["JA", "JP", "JPN", "JN"],
@@ -50,39 +45,7 @@ export const quizQuestions: QuizQuestion[] = [
     explanation: "JP is the ISO 3166-1 country code for Japan."
   },
   {
-    id: "q7",
-    category: "customs",
-    question: "A customer ships engine parts to Brazil. Is customs documentation required?",
-    options: ["Only if value exceeds $1,000", "Yes — all international shipments require customs", "No — industrial parts are exempt", "Only if declared value exceeds $5,000"],
-    correct: 1,
-    explanation: "ALL international shipments require customs documentation regardless of value or content type."
-  },
-  {
-    id: "q8",
-    category: "general",
-    question: "What does 'Declared Value' represent in the CRA form?",
-    options: ["The shipping cost", "The market value of the goods being shipped", "The customs duty amount", "The insurance payout amount"],
-    correct: 1,
-    explanation: "Declared Value is the market value of the goods. This is used to calculate duties/taxes and insurance."
-  },
-  {
-    id: "q9",
-    category: "service_types",
-    question: "A customer needs to ship engine parts to Brazil — no rush, just reliable delivery. Which service is best?",
-    options: ["EXPRESS_9:00", "EXPRESS_12:00", "EXPRESS_WORLDWIDE", "ECONOMY_SELECT"],
-    correct: 3,
-    explanation: "ECONOMY_SELECT is the most cost-effective service for non-urgent international shipments."
-  },
-  {
-    id: "q10",
-    category: "customs",
-    question: "A customer ships 12 bottles of California wine to Sydney, Australia. What is the country of origin?",
-    options: ["AU", "FR", "US", "Depends on the grape variety"],
-    correct: 2,
-    explanation: "Country of origin is where the product was MADE, not where it is being shipped from or to. California wine = US."
-  },
-  {
-    id: "q11",
+    id: "q6",
     category: "country_codes",
     question: "What is the United Kingdom's DHL country code?",
     options: ["UK", "EN", "GB", "BR"],
@@ -90,31 +53,7 @@ export const quizQuestions: QuizQuestion[] = [
     explanation: "GB (Great Britain) is the ISO 3166-1 country code for the United Kingdom."
   },
   {
-    id: "q12",
-    category: "customs",
-    question: "Which harmonized (HS) code applies to laptops and portable computers?",
-    options: ["6913", "8471.30", "2204.21", "6204"],
-    correct: 1,
-    explanation: "HS code 8471.30 covers portable digital ADP (Automatic Data Processing) machines — laptops, notebooks."
-  },
-  {
-    id: "q13",
-    category: "general",
-    question: "A customer is sending a birthday present to their mother in Mexico. What is the shipment purpose?",
-    options: ["SOLD", "PERSONAL_USE", "GIFT", "COMMERCIAL_SAMPLE"],
-    correct: 2,
-    explanation: "A birthday present is a GIFT. This affects customs treatment and duty exemptions in many countries."
-  },
-  {
-    id: "q14",
-    category: "customs",
-    question: "What harmonized (HS) code covers women's dresses and garments?",
-    options: ["8409.99", "6204", "2204.21", "6913"],
-    correct: 1,
-    explanation: "HS code 6204 covers women's suits, ensembles, dresses, and similar garment articles."
-  },
-  {
-    id: "q15",
+    id: "q7",
     category: "country_codes",
     question: "What is Australia's DHL country code?",
     options: ["AUS", "AS", "AU", "AT"],
@@ -122,20 +61,90 @@ export const quizQuestions: QuizQuestion[] = [
     explanation: "AU is the ISO 3166-1 country code for Australia. (AT is Austria — don't confuse them!)"
   },
   {
-    id: "q16",
-    category: "document_vs_package",
-    question: "What declared value should you enter for a DOCUMENT shipment (internal legal papers)?",
-    options: ["The paper's printing cost", "The document's legal value", "0 — documents have no commercial value", "Whatever the customer states"],
+    id: "q8",
+    category: "country_codes",
+    question: "What is Canada's DHL country code?",
+    options: ["CN", "CAN", "CA", "CD"],
     correct: 2,
-    explanation: "Internal documents have no commercial/resale value. Declared value = 0."
+    explanation: "CA is the ISO 3166-1 country code for Canada. (CN is China — easy mix-up!)"
+  },
+  {
+    id: "q9",
+    category: "country_codes",
+    question: "What is Colombia's DHL country code?",
+    options: ["CL", "CB", "CM", "CO"],
+    correct: 3,
+    explanation: "CO is the country code for Colombia. CL is Chile — a very common mix-up."
+  },
+
+  // ── Service Types ──
+  {
+    id: "q10",
+    category: "service_types",
+    question: "A customer says their documents must arrive at the destination office by 9:00 AM. Which service do you select?",
+    options: ["EXPRESS_WORLDWIDE", "EXPRESS_12:00", "ECONOMY_SELECT", "EXPRESS_9:00"],
+    correct: 3,
+    explanation: "EXPRESS_9:00 guarantees delivery by 9:00 AM on the next business day."
+  },
+
+  // ── Customs & HS Codes ──
+  {
+    id: "q11",
+    category: "customs",
+    question: "A customer ships engine parts to Brazil. Is customs documentation required?",
+    options: ["Only if value exceeds $1,000", "Yes — all international shipments require customs", "No — industrial parts are exempt", "Only if declared value exceeds $5,000"],
+    correct: 1,
+    explanation: "ALL international shipments require customs documentation regardless of value or content type."
+  },
+  {
+    id: "q12",
+    category: "customs",
+    question: "A customer ships 12 bottles of California wine to Sydney, Australia. What is the country of origin?",
+    options: ["AU", "FR", "US", "Depends on the grape variety"],
+    correct: 2,
+    explanation: "Country of origin is where the product was MADE, not where it is being shipped from or to. California wine = US."
+  },
+  {
+    id: "q13",
+    category: "customs",
+    question: "What harmonized (HS) code covers women's dresses and garments?",
+    options: ["8409.99", "6204", "2204.21", "6913"],
+    correct: 1,
+    explanation: "HS code 6204 covers women's suits, ensembles, dresses, and similar garment articles."
+  },
+  {
+    id: "q14",
+    category: "customs",
+    question: "What is the harmonized (HS) code for bottled wine?",
+    options: ["2204.21", "6204", "8471.30", "6913"],
+    correct: 0,
+    explanation: "HS code 2204.21 covers wine of fresh grapes in containers of 2 liters or less (bottled wine)."
+  },
+
+  // ── General Knowledge ──
+  {
+    id: "q15",
+    category: "general",
+    question: "A customer brings 2 separate boxes to ship to Japan. What number goes in 'Number of Pieces'?",
+    options: ["1", "2", "The total item count inside the boxes", "Leave blank"],
+    correct: 1,
+    explanation: "Number of Pieces refers to the number of physical boxes/parcels, not items inside. The customer has 2 boxes = 2 pieces."
+  },
+  {
+    id: "q16",
+    category: "general",
+    question: "What does 'Declared Value' represent in the CRA form?",
+    options: ["The shipping cost", "The market value of the goods being shipped", "The customs duty amount", "The insurance payout amount"],
+    correct: 1,
+    explanation: "Declared Value is the market value of the goods. This is used to calculate duties/taxes and insurance."
   },
   {
     id: "q17",
-    category: "country_codes",
-    question: "What is Brazil's DHL country code?",
-    options: ["BZ", "BA", "BR", "BRA"],
+    category: "general",
+    question: "A customer is sending a birthday present to their mother in Mexico. What is the shipment purpose?",
+    options: ["SOLD", "PERSONAL_USE", "GIFT", "COMMERCIAL_SAMPLE"],
     correct: 2,
-    explanation: "BR is the ISO 3166-1 country code for Brazil (Brasil)."
+    explanation: "A birthday present is a GIFT. This affects customs treatment and duty exemptions in many countries."
   },
   {
     id: "q18",
@@ -147,99 +156,76 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: "q19",
-    category: "customs",
-    question: "What is the harmonized (HS) code for bottled wine?",
-    options: ["2204.21", "6204", "8471.30", "6913"],
-    correct: 0,
-    explanation: "HS code 2204.21 covers wine of fresh grapes in containers of 2 liters or less (bottled wine)."
-  },
-  {
-    id: "q20",
     category: "general",
     question: "A customer ships 2 boxes to Japan, each weighing 25 lbs. What total weight goes in the shipment form?",
     options: ["25 lbs (one box only)", "50 lbs (combined total)", "Either is acceptable", "Depends on the carrier service"],
     correct: 1,
     explanation: "Always enter the TOTAL combined weight of all pieces. 2 boxes × 25 lbs = 50 lbs."
   },
-  // ── New country code questions (Oak Lawn real-world destinations) ──
+
+  // ── Scenarios (NEW) ──
   {
-    id: "q21",
-    category: "country_codes",
-    question: "What is Guatemala's DHL country code?",
-    options: ["GU", "GTA", "GT", "GA"],
-    correct: 2,
-    explanation: "GT is the ISO 3166-1 country code for Guatemala. (GU is Guam — don't confuse them!)"
-  },
-  {
-    id: "q22",
-    category: "country_codes",
-    question: "What is Canada's DHL country code?",
-    options: ["CN", "CAN", "CA", "CD"],
-    correct: 2,
-    explanation: "CA is the ISO 3166-1 country code for Canada. (CN is China — easy mix-up!)"
-  },
-  {
-    id: "q23",
-    category: "country_codes",
-    question: "What is Colombia's DHL country code?",
-    options: ["CL", "CB", "CM", "CO"],
-    correct: 3,
-    explanation: "CO is the country code for Colombia. CL is Chile — a very common mix-up."
-  },
-  {
-    id: "q24",
-    category: "country_codes",
-    question: "What is El Salvador's DHL country code?",
-    options: ["ES", "SV", "SA", "SL"],
+    id: "s1",
+    category: "scenarios",
+    question: "A customer walks in with a box of used clothes for their mother in Guatemala. They say 'these are just old clothes, they're not worth anything.' What declared value should you enter?",
+    options: ["$0 — customer says worthless", "Ask the customer for a fair market value estimate", "Enter $1 as a placeholder", "Skip declared value for used items"],
     correct: 1,
-    explanation: "SV is the country code for El Salvador (El Salvador in Spanish, Salvadoria). ES is Spain."
+    explanation: "Even used items have market value. You MUST ask the customer to estimate the fair market value. Entering $0 for physical goods can cause customs issues."
   },
   {
-    id: "q25",
-    category: "country_codes",
-    question: "What is Jordan's DHL country code?",
-    options: ["JO", "JR", "JD", "JN"],
-    correct: 0,
-    explanation: "JO is the ISO 3166-1 country code for Jordan (Hashemite Kingdom of Jordan)."
-  },
-  {
-    id: "q26",
-    category: "country_codes",
-    question: "What is the Philippines' DHL country code?",
-    options: ["PI", "PL", "PH", "RP"],
-    correct: 2,
-    explanation: "PH is the ISO 3166-1 country code for the Philippines."
-  },
-  {
-    id: "q27",
-    category: "general",
-    question: "A customer sends immigration documents to a Canadian government office. The 'Residential Address' checkbox should be:",
-    options: ["Checked — all Canadian addresses are residential", "Unchecked — a government office is not residential", "Checked — any personal document is residential", "Left blank — only applies to packages"],
+    id: "s2",
+    category: "scenarios",
+    question: "A customer gives you a phone number +52-555-1234 for a Mexico shipment. The CRA form shows +1 as the country code prefix. What do you do?",
+    options: ["Enter the full number including +52", "Remove the +52 and just enter 555-1234 since CRA adds the prefix", "Change the destination country to fix the prefix", "Tell the customer the number is wrong"],
     correct: 1,
-    explanation: "Government offices, businesses, and institutions are NOT residential. Only check residential for actual home addresses."
+    explanation: "The CRA auto-adds the country code prefix based on the destination country. Enter only the local number without the country code — the system handles the prefix."
   },
   {
-    id: "q28",
-    category: "general",
-    question: "A customer ships a tablet computer ($500) and clothing ($150) in one box. What declared value do you enter?",
-    options: ["$500 (electronics only)", "$150 (clothing only)", "$650 (total combined value)", "$500 (highest-value item only)"],
-    correct: 2,
-    explanation: "Declared value must be the TOTAL value of all contents in the shipment: $500 + $150 = $650."
-  },
-  {
-    id: "q29",
-    category: "customs",
-    question: "What is the HS (harmonized) code for tablet computers and portable laptops?",
-    options: ["6110", "8517", "8471.30", "6204"],
-    correct: 2,
-    explanation: "8471.30 covers portable Automatic Data Processing machines — laptops, tablets, notebooks."
-  },
-  {
-    id: "q30",
-    category: "general",
-    question: "A customer sends a package to the Philippines — their family lives at a home address. The 'Residential Address' checkbox should be:",
-    options: ["Unchecked — international addresses are never residential", "Checked — their family lives at a home address", "Left blank — only for domestic shipments", "Depends on the value of the package"],
+    id: "s3",
+    category: "scenarios",
+    question: "A customer brings in an envelope with legal contracts to send to a law firm in Canada. They ask 'do I need to fill out a commercial invoice?' What do you tell them?",
+    options: ["Yes, all international shipments need a commercial invoice", "No — select DOCUMENT as content type and the commercial invoice tab is not required", "Yes, but enter $0 value", "Only if the documents are notarized"],
     correct: 1,
-    explanation: "If the consignee lives at a home (not a business or office), the Residential Address checkbox must be checked — regardless of the destination country."
-  }
+    explanation: "Legal documents with no commercial value are DOCUMENT type. The Commercial Invoice tab locks automatically for DOCUMENT shipments — it's not needed."
+  },
+  {
+    id: "s4",
+    category: "scenarios",
+    question: "A customer ships a package to a DHL Express Service Point in Mexico (not a home address). Should you check the 'Residential Address' box?",
+    options: ["Yes — it's going to Mexico", "No — a DHL Service Point is a business location, not residential", "Yes — the final recipient lives at a house", "Only if the package weighs over 10 lbs"],
+    correct: 1,
+    explanation: "Residential Address refers to the DELIVERY address, not the recipient's home. A DHL Service Point is a commercial/business location — do NOT check residential."
+  },
+  {
+    id: "s5",
+    category: "scenarios",
+    question: "A customer wants to send electronics (a tablet worth $500) and clothing ($150) in ONE box to Colombia. How many items do you add in the Commercial Invoice?",
+    options: ["1 item — it's one box", "2 items — electronics and clothing are different commodity types", "It doesn't matter as long as the total value is correct", "3 items — tablet, charger, and clothing"],
+    correct: 1,
+    explanation: "Different product types need separate line items on the Commercial Invoice because they have different HS codes. Electronics (8471.30) and clothing (6110) must be listed separately."
+  },
+  {
+    id: "s6",
+    category: "scenarios",
+    question: "A customer says 'I need this there by tomorrow morning, 9 AM.' The destination is Amman, Jordan. What do you check first?",
+    options: ["Select EXPRESS_9:00 immediately", "Check if EXPRESS_9:00 service is available to Jordan", "Tell them it's impossible for international", "Select EXPRESS_WORLDWIDE and hope for the best"],
+    correct: 1,
+    explanation: "Not all services are available to all destinations. EXPRESS_9:00 is only available in select markets. Always verify service availability for the destination before promising delivery times."
+  },
+  {
+    id: "s7",
+    category: "scenarios",
+    question: "You're filling out a shipment and realize the customer's home address in Chicago is the SHIPPER, not the consignee. The shipper country code should be:",
+    options: ["Whatever country the package is going to", "US — the shipper is in Chicago", "The customer's nationality", "Leave blank — CRA fills it automatically"],
+    correct: 1,
+    explanation: "The SHIPPER is whoever is sending the package. If they're shipping FROM Chicago, the shipper country is US regardless of their nationality or destination."
+  },
+  {
+    id: "s8",
+    category: "scenarios",
+    question: "A customer brings 3 separate boxes, all going to the same address in the Philippines. Each box weighs 10 lbs. What do you enter for pieces and weight?",
+    options: ["Pieces: 1, Weight: 30 lbs", "Pieces: 3, Weight: 10 lbs", "Pieces: 3, Weight: 30 lbs", "Create 3 separate shipments"],
+    correct: 2,
+    explanation: "Number of Pieces = number of physical boxes (3). Weight = total combined weight of ALL pieces (3 × 10 = 30 lbs)."
+  },
 ];

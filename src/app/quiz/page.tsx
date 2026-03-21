@@ -22,6 +22,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   service_types: "Service Types",
   customs: "Customs & HS Codes",
   general: "General Knowledge",
+  scenarios: "Real Scenarios",
 };
 
 const CATEGORY_PILL_COLORS: Record<string, string> = {
@@ -30,6 +31,7 @@ const CATEGORY_PILL_COLORS: Record<string, string> = {
   service_types: "bg-orange-100 text-orange-800 border-orange-200",
   customs: "bg-green-100 text-green-800 border-green-200",
   general: "bg-gray-100 text-gray-700 border-gray-200",
+  scenarios: "bg-yellow-100 text-yellow-800 border-yellow-200",
 };
 
 function getGrade(score: number): string {
@@ -211,6 +213,51 @@ export default function QuizPage() {
                 })}
               </div>
             </div>
+
+            {/* Review Wrong Answers */}
+            {session.questions.some((q, i) => session.answers[i] !== q.correct) && (
+              <div className="bg-white border border-[#ddd] rounded-sm shadow-sm mb-4">
+                <div className="px-6 py-3 border-b border-[#eee]">
+                  <h3 className="font-bold text-[#1a1a1a] text-sm uppercase tracking-wide">Review Wrong Answers</h3>
+                </div>
+                <div className="px-6 py-4 space-y-5">
+                  {session.questions.map((q, i) => {
+                    if (session.answers[i] === q.correct) return null;
+                    const userAnswer = session.answers[i];
+                    return (
+                      <div key={q.id} className="border-b border-gray-100 pb-4 last:border-b-0 last:pb-0">
+                        <p className="text-sm font-bold text-[#1a1a1a] mb-2">{q.question}</p>
+                        <div className="space-y-1.5 mb-2">
+                          {q.options.map((opt, optIdx) => {
+                            let style = "text-sm px-3 py-1.5 rounded-[3px] border";
+                            if (optIdx === userAnswer) {
+                              style += " bg-red-50 border-red-300 text-red-800";
+                            } else if (optIdx === q.correct) {
+                              style += " bg-green-50 border-green-300 text-green-800";
+                            } else {
+                              style += " bg-white border-transparent text-gray-400";
+                            }
+                            return (
+                              <div key={optIdx} className={style}>
+                                <span className="flex items-center gap-2">
+                                  <span className="font-bold text-xs w-4">{String.fromCharCode(65 + optIdx)}.</span>
+                                  <span>{opt}</span>
+                                  {optIdx === userAnswer && <span className="ml-auto text-xs font-bold text-red-600">Your answer</span>}
+                                  {optIdx === q.correct && <span className="ml-auto text-xs font-bold text-green-700">Correct</span>}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                        <div className="bg-blue-50 border border-blue-200 rounded-[3px] px-3 py-2">
+                          <p className="text-xs text-blue-900 italic">{q.explanation}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* Actions */}
             <div className="flex flex-col sm:flex-row gap-3">

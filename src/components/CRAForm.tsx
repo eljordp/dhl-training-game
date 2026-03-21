@@ -337,8 +337,8 @@ function TabButton({
     <button
       onClick={isLocked ? undefined : onClick}
       disabled={isLocked}
-      className="flex items-center gap-1.5 px-3 py-2 border-r border-gray-300 text-xs whitespace-nowrap transition-none"
-      style={{ ...bgStyle, fontFamily: "Arial, sans-serif", fontSize: "12px", minHeight: "36px" }}
+      className="flex items-center gap-1.5 px-3 py-3 md:py-2 border-r border-gray-300 text-xs whitespace-nowrap transition-none"
+      style={{ ...bgStyle, fontFamily: "Arial, sans-serif", fontSize: "12px", minHeight: "44px" }}
     >
       <span>{label}</span>
       {!isActive && !isLocked && (
@@ -997,7 +997,7 @@ export default function CRAForm({ form, onChange, fieldResults, disabled, onSave
       </div>
 
       {/* Bottom Action Bar */}
-      <div className="flex-shrink-0 bg-white border-t border-gray-300 px-3 py-2 flex items-center justify-between gap-2">
+      <div className="flex-shrink-0 bg-white border-t border-gray-300 px-3 py-2 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2">
         <button
           className="px-3 py-1.5 text-sm font-bold text-white rounded-sm cursor-pointer"
           style={{ background: "#D40511" }}
@@ -1005,7 +1005,7 @@ export default function CRAForm({ form, onChange, fieldResults, disabled, onSave
         >
           Cancel Shipment
         </button>
-        <div className="flex gap-2">
+        <div className="flex flex-col md:flex-row gap-2">
           <button
             className="px-3 py-1.5 text-sm font-bold text-white rounded-sm cursor-pointer"
             style={{ background: "#28a745" }}

@@ -1,6 +1,6 @@
 export interface QuizQuestion {
   id: string;
-  category: "document_vs_package" | "country_codes" | "service_types" | "customs" | "general";
+  category: "document_vs_package" | "country_codes" | "service_types" | "customs" | "general" | "scenarios";
   question: string;
   options: string[];
   correct: number; // index of correct option
