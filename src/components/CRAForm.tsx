@@ -869,8 +869,8 @@ export default function CRAForm({ form, onChange, fieldResults, disabled, onSave
                   onChange={(v) => updateShipper("partyTraderType", v)}
                   options={[
                     { value: "Private", label: "Private" },
-                    { value: "Business", label: "Business" },
                     { value: "Direct Consumer", label: "Direct Consumer" },
+                    { value: "Business", label: "Business" },
                     { value: "Government", label: "Government" },
                     { value: "Reseller", label: "Reseller" },
                   ]}
@@ -940,15 +940,28 @@ export default function CRAForm({ form, onChange, fieldResults, disabled, onSave
                   </div>
                   <FieldError result={fr["consignee.phone"]} />
                 </div>
-                <CraInput label="Email" value={form.consignee.email} onChange={(v) => updateConsignee("email", v)} disabled={disabled} />
+                <div>
+                  <div className="flex items-center gap-2">
+                    <CraInput label="Email" value={form.consignee.email} onChange={(v) => updateConsignee("email", v)} disabled={disabled} />
+                    <button
+                      type="button"
+                      onClick={() => updateConsignee("email", form.shipper.email)}
+                      disabled={disabled || !form.shipper.email}
+                      className="mt-4 px-2 py-1 text-xs border border-gray-300 rounded-sm bg-gray-50 hover:bg-gray-100 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
+                      title="Copy shipper email"
+                    >
+                      ← Copy
+                    </button>
+                  </div>
+                </div>
                 <CraSelect
                   label="Party Trader Type"
                   value={form.consignee.partyTraderType}
                   onChange={(v) => updateConsignee("partyTraderType", v)}
                   options={[
                     { value: "Private", label: "Private" },
-                    { value: "Business", label: "Business" },
                     { value: "Direct Consumer", label: "Direct Consumer" },
+                    { value: "Business", label: "Business" },
                     { value: "Government", label: "Government" },
                     { value: "Reseller", label: "Reseller" },
                   ]}
