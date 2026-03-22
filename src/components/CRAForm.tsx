@@ -881,15 +881,6 @@ export default function CRAForm({ form, onChange, fieldResults, disabled, onSave
                   <input type="checkbox" className="w-3.5 h-3.5" disabled={disabled} />
                   <label style={{ fontSize: "12px", color: "#555" }}>Email Receipt</label>
                 </div>
-                <CraInput label="Registration Number" value="" onChange={() => {}} disabled={disabled} />
-                <CraInput label="VAT" value="" onChange={() => {}} disabled={disabled} />
-                <CraSelect
-                  label="VAT Issuing Country"
-                  value=""
-                  onChange={() => {}}
-                  options={COUNTRY_OPTIONS.map((o) => ({ value: o.value, label: `${o.value} - ${o.label}` }))}
-                  disabled={disabled}
-                />
               </div>
             </div>
 
@@ -972,15 +963,6 @@ export default function CRAForm({ form, onChange, fieldResults, disabled, onSave
                   <input type="checkbox" className="w-3.5 h-3.5" disabled={disabled} />
                   <label style={{ fontSize: "12px", color: "#555" }}>Email Receipt</label>
                 </div>
-                <CraInput label="Registration Number" value="" onChange={() => {}} disabled={disabled} />
-                <CraInput label="VAT" value="" onChange={() => {}} disabled={disabled} />
-                <CraSelect
-                  label="VAT Issuing Country"
-                  value=""
-                  onChange={() => {}}
-                  options={COUNTRY_OPTIONS.map((o) => ({ value: o.value, label: `${o.value} - ${o.label}` }))}
-                  disabled={disabled}
-                />
               </div>
             </div>
           </div>
