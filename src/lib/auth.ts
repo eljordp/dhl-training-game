@@ -1,50 +1,48 @@
 "use client";
-import { createClient } from "./supabase";
+
 import { UserProfile } from "@/types/auth";
 
-// Username is stored as `username@dhl-training.local` internally
-function toEmail(username: string) {
-  return `${username.toLowerCase().trim()}@dhl-training.local`;
+export async function signIn(
+  username: string,
+  password: string
+): Promise<{ data: { profile: UserProfile } | null; error: { message: string } | null }> {
+  try {
+    const res = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password }),
+    });
+
+    const json = await res.json();
+
+    if (!res.ok || !json.success) {
+      return { data: null, error: { message: json.error || "Login failed" } };
+    }
+
+    return { data: { profile: json.profile }, error: null };
+  } catch {
+    return { data: null, error: { message: "Network error" } };
+  }
 }
 
-export async function signIn(username: string, password: string) {
-  const supabase = createClient();
-  if (!supabase) return { data: null, error: { message: "Auth not configured" } };
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email: toEmail(username),
-    password,
-  });
-  return { data, error };
-}
-
-export async function signOut() {
-  const supabase = createClient();
-  if (!supabase) return;
-  await supabase.auth.signOut();
+export async function signOut(): Promise<void> {
+  try {
+    await fetch("/api/auth/logout", { method: "POST" });
+  } catch {
+    // fail silently
+  }
 }
 
 export async function getProfile(): Promise<UserProfile | null> {
-  const supabase = createClient();
-  if (!supabase) return null;
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return null;
-
-  const { data } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single();
-
-  return data ?? null;
+  try {
+    const res = await fetch("/api/auth/me");
+    const json = await res.json();
+    return json.profile ?? null;
+  } catch {
+    return null;
+  }
 }
 
-export async function getCurrentUser() {
-  const supabase = createClient();
-  if (!supabase) return null;
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  return user;
+export async function getCurrentUser(): Promise<UserProfile | null> {
+  return getProfile();
 }

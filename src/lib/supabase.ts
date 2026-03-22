@@ -1,12 +1,6 @@
-import { createBrowserClient } from "@supabase/ssr";
+// Supabase has been replaced with direct PostgreSQL connection.
+// This file is kept as a no-op for any lingering imports.
 
 export function createClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  if (!url || !key) {
-    return null;
-  }
-
-  return createBrowserClient(url, key);
+  return null;
 }

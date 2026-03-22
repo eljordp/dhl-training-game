@@ -1,43 +1,44 @@
-import { createClient } from "@supabase/supabase-js";
-import { NextResponse } from "next/server";
+import { getPool } from "@/lib/db";
+import bcrypt from "bcryptjs";
+import { randomUUID } from "crypto";
 
 export async function POST(req: Request) {
+  const pool = getPool();
+  if (!pool) {
+    return Response.json({ error: "Database not configured" }, { status: 503 });
+  }
+
   const { username, displayName, password } = await req.json();
 
   if (!username || !displayName || !password) {
-    return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+    return Response.json({ error: "Missing fields" }, { status: 400 });
   }
 
-  // Use service role key to create users without email verification
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  try {
+    const normalizedUsername = username.toLowerCase().trim();
 
-  const email = `${username.toLowerCase().trim()}@dhl-training.local`;
+    // Check if username already exists
+    const existing = await pool.query(
+      "SELECT id FROM profiles WHERE username = $1",
+      [normalizedUsername]
+    );
 
-  // Create auth user
-  const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-    email,
-    password,
-    email_confirm: true, // skip email verification
-  });
+    if (existing.rows.length > 0) {
+      return Response.json({ error: "Username already exists" }, { status: 400 });
+    }
 
-  if (authError) {
-    return NextResponse.json({ error: authError.message }, { status: 400 });
+    const passwordHash = await bcrypt.hash(password, 10);
+    const id = randomUUID();
+
+    await pool.query(
+      `INSERT INTO profiles (id, username, password_hash, display_name, role, created_at)
+       VALUES ($1, $2, $3, $4, $5, NOW())`,
+      [id, normalizedUsername, passwordHash, displayName, "employee"]
+    );
+
+    return Response.json({ success: true });
+  } catch (err) {
+    console.error("Create employee error:", err);
+    return Response.json({ error: "Failed to create employee" }, { status: 500 });
   }
-
-  // Create profile
-  const { error: profileError } = await supabase.from("profiles").insert({
-    id: authData.user.id,
-    username: username.toLowerCase().trim(),
-    display_name: displayName,
-    role: "employee",
-  });
-
-  if (profileError) {
-    return NextResponse.json({ error: profileError.message }, { status: 400 });
-  }
-
-  return NextResponse.json({ success: true });
 }

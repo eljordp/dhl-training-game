@@ -3,10 +3,9 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getProfile } from "@/lib/auth";
-import { createClient } from "@/lib/supabase";
 import DHLHeader from "@/components/DHLHeader";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// --- Types ---
 
 interface FieldResultRow {
   field: string;
@@ -46,7 +45,7 @@ interface EmployeeStats {
   quizAttempts: QuizAttemptRow[];
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// --- Helpers ---
 
 function formatDate(iso: string) {
   const d = new Date(iso);
@@ -78,7 +77,7 @@ function lastActive(attempts: ScenarioAttemptRow[], quizAttempts: QuizAttemptRow
   return dates.sort().reverse()[0];
 }
 
-// ─── Weak Spots ───────────────────────────────────────────────────────────────
+// --- Weak Spots ---
 
 function computeWeakSpots(employees: EmployeeStats[]) {
   const fieldMisses: Record<string, { label: string; missed: number; total: number }> = {};
@@ -110,7 +109,7 @@ function computeWeakSpots(employees: EmployeeStats[]) {
     .slice(0, 5);
 }
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
+// --- Sub-components ---
 
 function FieldResultsRow({ results }: { results: FieldResultRow[] }) {
   return (
@@ -128,7 +127,7 @@ function FieldResultsRow({ results }: { results: FieldResultRow[] }) {
           {results.map((fr, i) => (
             <tr key={i} className={i % 2 === 0 ? "bg-white" : "bg-[#fafafa]"}>
               <td className="px-3 py-1.5 text-[#333] font-medium">{fr.label || fr.field}</td>
-              <td className="px-3 py-1.5 text-[#555]">{fr.user_value || "—"}</td>
+              <td className="px-3 py-1.5 text-[#555]">{fr.user_value || "\u2014"}</td>
               <td className="px-3 py-1.5 text-[#555]">{fr.correct_value}</td>
               <td className="px-3 py-1.5">
                 {fr.is_correct ? (
@@ -174,7 +173,7 @@ function AttemptCard({ attempt }: { attempt: ScenarioAttemptRow }) {
           <span className="text-xs text-[#888]">{formatTime(attempt.time_spent)}</span>
           <span className="text-xs text-[#888]">+{attempt.xp_earned} XP</span>
         </div>
-        <span className="text-[#888] text-xs ml-2">{expanded ? "▲" : "▼"}</span>
+        <span className="text-[#888] text-xs ml-2">{expanded ? "\u25B2" : "\u25BC"}</span>
       </button>
       {expanded && attempt.field_results?.length > 0 && (
         <div className="px-4 pb-3">
@@ -213,20 +212,20 @@ function EmployeeRow({ employee }: { employee: EmployeeStats }) {
               {avg}%
             </span>
           ) : (
-            <span className="text-[#aaa]">—</span>
+            <span className="text-[#aaa]">{"\u2014"}</span>
           )}
         </td>
         <td className="px-4 py-3 text-sm text-center">
           {best !== null ? (
             <span className="font-bold text-[#1a1a1a]">{best}%</span>
           ) : (
-            <span className="text-[#aaa]">—</span>
+            <span className="text-[#aaa]">{"\u2014"}</span>
           )}
         </td>
         <td className="px-4 py-3 text-sm text-[#888]">
           {last ? formatDate(last) : <span className="text-[#aaa]">Never</span>}
         </td>
-        <td className="px-4 py-3 text-xs text-[#888]">{expanded ? "▲ Hide" : "▼ View"}</td>
+        <td className="px-4 py-3 text-xs text-[#888]">{expanded ? "\u25B2 Hide" : "\u25BC View"}</td>
       </tr>
       {expanded && (
         <tr>
@@ -269,7 +268,7 @@ function EmployeeRow({ employee }: { employee: EmployeeStats }) {
   );
 }
 
-// ─── Main Dashboard ────────────────────────────────────────────────────────────
+// --- Main Dashboard ---
 
 export default function ManagerDashboard() {
   const router = useRouter();
@@ -297,36 +296,18 @@ export default function ManagerDashboard() {
     })();
   }, [router]);
 
-  // Data fetch
+  // Data fetch via API
   useEffect(() => {
     if (!authChecked) return;
 
     (async () => {
-      const supabase = createClient();
-      if (!supabase) return;
-
-      const [profilesRes, attemptsRes, quizRes] = await Promise.all([
-        supabase.from("profiles").select("*").eq("role", "employee"),
-        supabase
-          .from("scenario_attempts")
-          .select("*, field_results(*)")
-          .order("created_at", { ascending: false }),
-        supabase.from("quiz_attempts").select("*").order("created_at", { ascending: false }),
-      ]);
-
-      const profiles = profilesRes.data ?? [];
-      const allAttempts: ScenarioAttemptRow[] = (attemptsRes.data ?? []) as ScenarioAttemptRow[];
-      const allQuizAttempts: QuizAttemptRow[] = (quizRes.data ?? []) as QuizAttemptRow[];
-
-      const enriched: EmployeeStats[] = profiles.map((p) => ({
-        id: p.id,
-        username: p.username,
-        display_name: p.display_name,
-        attempts: allAttempts.filter((a: ScenarioAttemptRow & { user_id?: string }) => a.user_id === p.id),
-        quizAttempts: allQuizAttempts.filter((a: QuizAttemptRow & { user_id?: string }) => a.user_id === p.id),
-      }));
-
-      setEmployees(enriched);
+      try {
+        const res = await fetch("/api/dashboard");
+        const json = await res.json();
+        setEmployees(json.employees ?? []);
+      } catch {
+        setEmployees([]);
+      }
       setLoading(false);
     })();
   }, [authChecked]);
@@ -352,19 +333,13 @@ export default function ManagerDashboard() {
       setUsername("");
       setPassword("");
       // Refresh employee list
-      const supabase = createClient();
-      if (!supabase) return;
-      const { data: profiles } = await supabase.from("profiles").select("*").eq("role", "employee");
-      const allAttempts = employees.flatMap((e) => e.attempts);
-      const allQuiz = employees.flatMap((e) => e.quizAttempts);
-      const enriched: EmployeeStats[] = (profiles ?? []).map((p) => ({
-        id: p.id,
-        username: p.username,
-        display_name: p.display_name,
-        attempts: allAttempts.filter((a: ScenarioAttemptRow & { user_id?: string }) => a.user_id === p.id),
-        quizAttempts: allQuiz.filter((a: QuizAttemptRow & { user_id?: string }) => a.user_id === p.id),
-      }));
-      setEmployees(enriched);
+      try {
+        const refreshRes = await fetch("/api/dashboard");
+        const refreshJson = await refreshRes.json();
+        setEmployees(refreshJson.employees ?? []);
+      } catch {
+        // keep existing data
+      }
     } else {
       setCreateMsg({ type: "error", text: json.error || "Something went wrong." });
     }
@@ -397,7 +372,7 @@ export default function ManagerDashboard() {
           </p>
         </div>
 
-        {/* ── Section 1: Employee Overview ─────────────────────────────────── */}
+        {/* Section 1: Employee Overview */}
         <section className="mb-8">
           <div className="flex items-center gap-2 mb-3">
             <span className="h-4 w-1 bg-[#D40511] rounded-full inline-block" />
@@ -434,7 +409,7 @@ export default function ManagerDashboard() {
           </div>
         </section>
 
-        {/* ── Section 2: Team Weak Spots ───────────────────────────────────── */}
+        {/* Section 2: Team Weak Spots */}
         <section className="mb-8">
           <div className="flex items-center gap-2 mb-3">
             <span className="h-4 w-1 bg-[#D40511] rounded-full inline-block" />
@@ -486,7 +461,7 @@ export default function ManagerDashboard() {
           </div>
         </section>
 
-        {/* ── Section 3: Add Employee ──────────────────────────────────────── */}
+        {/* Section 3: Add Employee */}
         <section className="mb-8">
           <div className="flex items-center gap-2 mb-3">
             <span className="h-4 w-1 bg-[#D40511] rounded-full inline-block" />
@@ -521,11 +496,6 @@ export default function ManagerDashboard() {
                   required
                   className="w-full border border-[#ccc] rounded-[2px] px-3 py-2 text-sm text-[#1a1a1a] focus:outline-none focus:border-[#FFCC00] focus:ring-1 focus:ring-[#FFCC00] bg-[#fafafa]"
                 />
-                {username && (
-                  <p className="text-[11px] text-[#aaa] mt-1">
-                    Login email: {username.toLowerCase().trim()}@dhl-training.local
-                  </p>
-                )}
               </div>
 
               <div>
