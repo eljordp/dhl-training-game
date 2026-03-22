@@ -1,6 +1,9 @@
+export type QuizDifficulty = "beginner" | "intermediate" | "advanced";
+
 export interface QuizQuestion {
   id: string;
   category: "document_vs_package" | "country_codes" | "service_types" | "customs" | "general" | "scenarios";
+  difficulty: QuizDifficulty;
   question: string;
   options: string[];
   correct: number; // index of correct option
@@ -14,4 +17,5 @@ export interface QuizSession {
   completed: boolean;
   startTime: number;
   timePerQuestion: number[]; // seconds per question
+  difficulty: QuizDifficulty | "all";
 }

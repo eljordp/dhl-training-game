@@ -22,12 +22,12 @@ export async function POST(req: Request) {
   }
 
   try {
-    const { score, totalQuestions, correctAnswers, timeSpent, questionResults } = await req.json();
+    const { score, totalQuestions, correctAnswers, timeSpent, questionResults, difficulty } = await req.json();
 
     await pool.query(
-      `INSERT INTO quiz_attempts (id, user_id, score, total_questions, correct_answers, time_spent, question_results)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-      [randomUUID(), session.userId, score, totalQuestions, correctAnswers, timeSpent, JSON.stringify(questionResults)]
+      `INSERT INTO quiz_attempts (id, user_id, score, total_questions, correct_answers, time_spent, question_results, difficulty)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+      [randomUUID(), session.userId, score, totalQuestions, correctAnswers, timeSpent, JSON.stringify(questionResults), difficulty || "all"]
     );
 
     return Response.json({ success: true });

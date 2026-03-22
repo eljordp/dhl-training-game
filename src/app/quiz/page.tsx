@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import DHLHeader from "@/components/DHLHeader";
 import { quizQuestions } from "@/data/quizQuestions";
-import { QuizSession } from "@/types/quiz";
+import { QuizSession, QuizDifficulty } from "@/types/quiz";
 import { saveQuizAttempt } from "@/lib/tracking";
 
 function shuffleArray<T>(arr: T[]): T[] {
@@ -34,6 +34,33 @@ const CATEGORY_PILL_COLORS: Record<string, string> = {
   scenarios: "bg-yellow-100 text-yellow-800 border-yellow-200",
 };
 
+const DIFFICULTY_CONFIG: Record<QuizDifficulty, { label: string; description: string; color: string; borderColor: string; bgColor: string; questionCount: number }> = {
+  beginner: {
+    label: "Beginner",
+    description: "Core concepts — document types, basic country codes, shipment basics",
+    color: "text-green-800",
+    borderColor: "border-green-400",
+    bgColor: "bg-green-50",
+    questionCount: 10,
+  },
+  intermediate: {
+    label: "Intermediate",
+    description: "Tricky country codes, customs rules, service types, real scenarios",
+    color: "text-yellow-800",
+    borderColor: "border-yellow-400",
+    bgColor: "bg-yellow-50",
+    questionCount: 10,
+  },
+  advanced: {
+    label: "Advanced",
+    description: "HS codes, edge-case scenarios, system quirks — the hard stuff",
+    color: "text-red-800",
+    borderColor: "border-red-400",
+    bgColor: "bg-red-50",
+    questionCount: 10,
+  },
+};
+
 function getGrade(score: number): string {
   if (score >= 95) return "A+";
   if (score >= 90) return "A";
@@ -50,23 +77,92 @@ function formatTime(seconds: number): string {
   return `${m}m ${s}s`;
 }
 
-function makeSession(): QuizSession {
+function makeSession(difficulty: QuizDifficulty | "all"): QuizSession {
+  let pool = [...quizQuestions];
+  if (difficulty !== "all") {
+    pool = pool.filter((q) => q.difficulty === difficulty);
+  }
+  const count = difficulty === "all" ? 10 : Math.min(DIFFICULTY_CONFIG[difficulty].questionCount, pool.length);
+  const questions = shuffleArray(pool).slice(0, count);
   return {
-    questions: shuffleArray([...quizQuestions]).slice(0, 10),
-    answers: new Array(10).fill(null),
+    questions,
+    answers: new Array(questions.length).fill(null),
     currentIndex: 0,
     completed: false,
     startTime: Date.now(),
     timePerQuestion: [],
+    difficulty,
   };
 }
 
 export default function QuizPage() {
   const router = useRouter();
-  const [session, setSession] = useState<QuizSession>(makeSession);
+  const [difficulty, setDifficulty] = useState<QuizDifficulty | "all" | null>(null);
+  const [session, setSession] = useState<QuizSession | null>(null);
   const [selected, setSelected] = useState<number | null>(null);
   const [revealed, setRevealed] = useState(false);
   const [questionStart, setQuestionStart] = useState(Date.now());
+
+  // Difficulty selection screen
+  if (!difficulty || !session) {
+    const beginnerCount = quizQuestions.filter((q) => q.difficulty === "beginner").length;
+    const intermediateCount = quizQuestions.filter((q) => q.difficulty === "intermediate").length;
+    const advancedCount = quizQuestions.filter((q) => q.difficulty === "advanced").length;
+
+    return (
+      <div className="min-h-[100dvh] flex flex-col bg-white" style={{ fontFamily: "Arial, sans-serif" }}>
+        <DHLHeader />
+        <div className="flex-1 flex items-start justify-center bg-[#f5f5f5] px-4 py-8">
+          <div className="w-full max-w-2xl">
+            <div className="bg-white border border-[#ddd] rounded-sm shadow-sm">
+              <div className="bg-[#FFCC00] px-6 py-3 border-b border-[#e6b800]">
+                <h2 className="font-bold text-[#1a1a1a] text-lg">Select Difficulty</h2>
+              </div>
+              <div className="px-6 py-6 space-y-3">
+                {(Object.entries(DIFFICULTY_CONFIG) as [QuizDifficulty, typeof DIFFICULTY_CONFIG["beginner"]][]).map(([key, cfg]) => {
+                  const count = key === "beginner" ? beginnerCount : key === "intermediate" ? intermediateCount : advancedCount;
+                  return (
+                    <button
+                      key={key}
+                      onClick={() => { setDifficulty(key); setSession(makeSession(key)); }}
+                      className={`w-full text-left px-5 py-4 rounded-[3px] border-2 ${cfg.borderColor} ${cfg.bgColor} hover:shadow-md transition cursor-pointer`}
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <span className={`font-bold text-base ${cfg.color}`}>{cfg.label}</span>
+                        <span className="text-xs text-gray-500 font-medium">{count} questions</span>
+                      </div>
+                      <p className="text-sm text-gray-600">{cfg.description}</p>
+                    </button>
+                  );
+                })}
+
+                {/* All questions option */}
+                <button
+                  onClick={() => { setDifficulty("all"); setSession(makeSession("all")); }}
+                  className="w-full text-left px-5 py-4 rounded-[3px] border-2 border-[#D40511] bg-red-50 hover:shadow-md transition cursor-pointer"
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-bold text-base text-[#D40511]">Mixed — All Levels</span>
+                    <span className="text-xs text-gray-500 font-medium">{quizQuestions.length} questions</span>
+                  </div>
+                  <p className="text-sm text-gray-600">Random mix from all difficulties — 10 questions</p>
+                </button>
+              </div>
+
+              <div className="px-6 pb-5">
+                <button
+                  onClick={() => router.push("/")}
+                  className="w-full bg-white hover:bg-gray-50 text-[#1a1a1a] border border-[#ccc] rounded-[3px] px-4 py-2.5 text-sm font-bold cursor-pointer transition"
+                >
+                  BACK TO HOME
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const current = session.questions[session.currentIndex];
   const isLast = session.currentIndex === session.questions.length - 1;
@@ -82,6 +178,7 @@ export default function QuizPage() {
     const elapsed = Math.round((Date.now() - questionStart) / 1000);
     setRevealed(true);
     setSession((prev) => {
+      if (!prev) return prev;
       const newAnswers = [...prev.answers];
       newAnswers[prev.currentIndex] = selected;
       return {
@@ -93,7 +190,7 @@ export default function QuizPage() {
   }
 
   function handleNext() {
-    if (!revealed) return;
+    if (!revealed || !session) return;
 
     if (isLast) {
       const timeSpent = Math.round((Date.now() - session.startTime) / 1000);
@@ -111,25 +208,42 @@ export default function QuizPage() {
         session.questions.length,
         correctCount,
         timeSpent,
-        questionResults
+        questionResults,
+        difficulty ?? "all"
       ).catch(() => {}); // fail silently if not logged in
 
-      setSession((prev) => ({ ...prev, completed: true }));
+      setSession((prev) => prev ? { ...prev, completed: true } : prev);
       return;
     }
 
-    setSession((prev) => ({ ...prev, currentIndex: prev.currentIndex + 1 }));
+    setSession((prev) => prev ? { ...prev, currentIndex: prev.currentIndex + 1 } : prev);
     setSelected(null);
     setRevealed(false);
     setQuestionStart(Date.now());
   }
 
   function handleRetry() {
-    setSession(makeSession());
+    setSession(makeSession(difficulty ?? "all"));
     setSelected(null);
     setRevealed(false);
     setQuestionStart(Date.now());
   }
+
+  function handleChangeDifficulty() {
+    setDifficulty(null);
+    setSession(null);
+    setSelected(null);
+    setRevealed(false);
+  }
+
+  const difficultyLabel = difficulty === "all" ? "Mixed" : DIFFICULTY_CONFIG[difficulty].label;
+  const difficultyPillColor = difficulty === "beginner"
+    ? "bg-green-100 text-green-800 border-green-200"
+    : difficulty === "intermediate"
+    ? "bg-yellow-100 text-yellow-800 border-yellow-200"
+    : difficulty === "advanced"
+    ? "bg-red-100 text-red-800 border-red-200"
+    : "bg-gray-100 text-gray-700 border-gray-200";
 
   // Results screen
   if (session.completed) {
@@ -149,7 +263,7 @@ export default function QuizPage() {
     const catBreakdown = categories.map((cat) => {
       const qs = session.questions.filter((q) => q.category === cat);
       const correct = qs.filter(
-        (q, _) => session.answers[session.questions.indexOf(q)] === q.correct
+        (q) => session.answers[session.questions.indexOf(q)] === q.correct
       ).length;
       return { cat, correct, total: qs.length };
     });
@@ -168,8 +282,11 @@ export default function QuizPage() {
           <div className="w-full max-w-2xl">
             {/* Score card */}
             <div className="bg-white border border-[#ddd] rounded-sm shadow-sm mb-4">
-              <div className="bg-[#FFCC00] px-6 py-3 border-b border-[#e6b800]">
+              <div className="bg-[#FFCC00] px-6 py-3 border-b border-[#e6b800] flex items-center justify-between">
                 <h2 className="font-bold text-[#1a1a1a] text-lg">Quiz Complete</h2>
+                <span className={`text-xs font-bold uppercase tracking-wide border px-2 py-0.5 rounded-full ${difficultyPillColor}`}>
+                  {difficultyLabel}
+                </span>
               </div>
               <div className="px-6 py-6 text-center">
                 <div className={`text-6xl font-black mb-1 ${gradeColor}`}>{grade}</div>
@@ -265,13 +382,13 @@ export default function QuizPage() {
                 onClick={handleRetry}
                 className="flex-1 bg-[#FFCC00] hover:bg-[#e6b800] active:bg-[#cca300] text-[#1a1a1a] border border-[#cca300] rounded-[3px] px-4 py-3 text-sm font-bold cursor-pointer transition"
               >
-                RETRY QUIZ
+                RETRY {difficultyLabel.toUpperCase()}
               </button>
               <button
-                onClick={() => router.push("/game")}
+                onClick={handleChangeDifficulty}
                 className="flex-1 bg-white hover:bg-gray-50 text-[#1a1a1a] border border-[#ccc] rounded-[3px] px-4 py-3 text-sm font-bold cursor-pointer transition"
               >
-                PRACTICE MODE
+                CHANGE DIFFICULTY
               </button>
               <button
                 onClick={() => router.push("/")}
@@ -308,8 +425,8 @@ export default function QuizPage() {
 
   function getOptionIcon(idx: number): string | null {
     if (!revealed) return null;
-    if (idx === current.correct) return "✓";
-    if (idx === selected && selected !== current.correct) return "✗";
+    if (idx === current.correct) return "\u2713";
+    if (idx === selected && selected !== current.correct) return "\u2717";
     return null;
   }
 
@@ -325,13 +442,18 @@ export default function QuizPage() {
                 <span className="text-xs text-gray-500 font-medium">
                   Question {session.currentIndex + 1} of {session.questions.length}
                 </span>
-                <span
-                  className={`text-xs font-bold uppercase tracking-wide border px-2 py-0.5 rounded-full ${
-                    CATEGORY_PILL_COLORS[current.category] ?? "bg-gray-100 text-gray-700 border-gray-200"
-                  }`}
-                >
-                  {CATEGORY_LABELS[current.category] ?? current.category}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className={`text-xs font-bold uppercase tracking-wide border px-2 py-0.5 rounded-full ${difficultyPillColor}`}>
+                    {difficultyLabel}
+                  </span>
+                  <span
+                    className={`text-xs font-bold uppercase tracking-wide border px-2 py-0.5 rounded-full ${
+                      CATEGORY_PILL_COLORS[current.category] ?? "bg-gray-100 text-gray-700 border-gray-200"
+                    }`}
+                  >
+                    {CATEGORY_LABELS[current.category] ?? current.category}
+                  </span>
+                </div>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2 mb-5">
                 <div

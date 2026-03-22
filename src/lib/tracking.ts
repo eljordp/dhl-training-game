@@ -21,13 +21,14 @@ export async function saveQuizAttempt(
   totalQuestions: number,
   correctAnswers: number,
   timeSpent: number,
-  questionResults: { questionId: string; category: string; correct: boolean; userAnswer: number }[]
+  questionResults: { questionId: string; category: string; correct: boolean; userAnswer: number }[],
+  difficulty: string
 ): Promise<void> {
   try {
     await fetch("/api/tracking/quiz", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ score, totalQuestions, correctAnswers, timeSpent, questionResults }),
+      body: JSON.stringify({ score, totalQuestions, correctAnswers, timeSpent, questionResults, difficulty }),
     });
   } catch {
     // fail silently

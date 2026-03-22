@@ -614,6 +614,8 @@ export default function CRAForm({ form, onChange, fieldResults, disabled, onSave
   const [editItemIndex, setEditItemIndex] = useState<number | null>(null);
   const [showPackagingModal, setShowPackagingModal] = useState(false);
   const [packagingQuantities, setPackagingQuantities] = useState<Record<number, string>>({});
+  const [hsSearch, setHsSearch] = useState("");
+  const [hsDropdownOpen, setHsDropdownOpen] = useState(false);
 
   const fr = fieldResults || {};
 
@@ -830,7 +832,8 @@ export default function CRAForm({ form, onChange, fieldResults, disabled, onSave
                   <CraInput label="Promotion Code" value={form.shipmentInfo.promotionCode} onChange={(v) => updateShipmentInfo("promotionCode", v)} disabled={disabled} />
                 </div>
                 <button
-                  className="px-3 py-2.5 md:py-1 text-xs font-bold rounded-sm whitespace-nowrap"
+                  onClick={() => setShowPackagingModal(true)}
+                  className="px-3 py-2.5 md:py-1 text-xs font-bold rounded-sm whitespace-nowrap cursor-pointer"
                   style={{ border: "1px solid #ccc", background: "white", color: "#333" }}
                   disabled={disabled}
                 >
@@ -985,13 +988,21 @@ export default function CRAForm({ form, onChange, fieldResults, disabled, onSave
                 </div>
               </div>
 
-              {!piecesAdded && !disabled && (
+              {!disabled && (
                 <button
-                  onClick={handleAddPiece}
+                  onClick={() => {
+                    if (piecesAdded) {
+                      // Reset to allow editing
+                      handleDeletePiece();
+                    } else {
+                      if (!piecesWeight) return; // require weight
+                      handleAddPiece();
+                    }
+                  }}
                   className="mb-3 px-3 py-1 text-sm font-bold text-white rounded-sm cursor-pointer"
-                  style={{ background: "#28a745" }}
+                  style={{ background: piecesAdded ? "#D40511" : "#28a745" }}
                 >
-                  Add
+                  {piecesAdded ? "Edit" : "Add"}
                 </button>
               )}
 
@@ -1224,15 +1235,66 @@ export default function CRAForm({ form, onChange, fieldResults, disabled, onSave
                 </div>
               </div>
 
-              <CraInput
-                label="HS/Harmonized Code"
-                value={form.customs.harmonizedCode}
-                onChange={(v) => updateCustoms("harmonizedCode", v)}
-                result={fr["customs.harmonizedCode"]}
-                disabled={disabled}
-                required
-                placeholder="e.g. 6204, 8471.30"
-              />
+              {/* HS Code Searchable Dropdown */}
+              <div className="relative">
+                <label style={{ fontSize: "12px", color: "#333", display: "block", marginBottom: "2px" }}>
+                  HS/Harmonized Code<span style={{ color: "#D40511" }}> *</span>
+                </label>
+                <input
+                  type="text"
+                  className={`w-full bg-white border rounded-sm px-2 py-2.5 md:py-1 focus:outline-none focus:border-[#D40511] text-base md:text-[13px] ${inputBorderClass(fr["customs.harmonizedCode"])} disabled:bg-gray-100 disabled:text-gray-400`}
+                  style={{ fontFamily: "Arial, sans-serif" }}
+                  value={hsDropdownOpen ? hsSearch : form.customs.harmonizedCode}
+                  onChange={(e) => {
+                    setHsSearch(e.target.value);
+                    setHsDropdownOpen(true);
+                    // Also update the form value as they type
+                    updateCustoms("harmonizedCode", e.target.value);
+                  }}
+                  onFocus={() => {
+                    setHsSearch(form.customs.harmonizedCode);
+                    setHsDropdownOpen(true);
+                  }}
+                  onBlur={() => {
+                    // Delay to allow click on dropdown item
+                    setTimeout(() => setHsDropdownOpen(false), 200);
+                  }}
+                  disabled={disabled}
+                  placeholder="Type to search HS codes..."
+                  autoComplete="off"
+                />
+                {hsDropdownOpen && !disabled && (() => {
+                  const search = hsSearch.toLowerCase();
+                  const filtered = search.length > 0
+                    ? COMMODITY_SUGGESTIONS.filter((code) => code.toLowerCase().includes(search)).slice(0, 8)
+                    : COMMODITY_SUGGESTIONS.slice(0, 8);
+                  if (filtered.length === 0) return null;
+                  return (
+                    <div className="absolute z-50 w-full bg-white border border-gray-300 rounded-sm shadow-lg max-h-48 overflow-y-auto" style={{ top: "100%", left: 0 }}>
+                      {filtered.map((code) => {
+                        const hsCode = code.split(" ")[0];
+                        return (
+                          <button
+                            key={code}
+                            type="button"
+                            className="w-full text-left px-2 py-1.5 text-xs hover:bg-[#FFCC00] hover:text-[#1a1a1a] cursor-pointer border-b border-gray-100 last:border-b-0"
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              updateCustoms("harmonizedCode", hsCode);
+                              setHsSearch(hsCode);
+                              setHsDropdownOpen(false);
+                            }}
+                          >
+                            <span className="font-bold">{hsCode}</span>{" "}
+                            <span className="text-gray-500">{code.slice(hsCode.length + 1)}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  );
+                })()}
+                <FieldError result={fr["customs.harmonizedCode"]} />
+              </div>
 
               <CraSelect
                 label="Country of Origin"
