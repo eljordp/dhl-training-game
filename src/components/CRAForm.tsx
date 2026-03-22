@@ -47,14 +47,67 @@ function getPhoneCode(countryCode: string): string {
 }
 
 const COMMODITY_SUGGESTIONS = [
-  "8517130000 SMARTPHONES",
-  "8471300000 PORTABLE DIGITAL ADP MACHINES",
-  "6204 WOMEN SUITS ENSEMBLES AND SIMILAR ARTICLES",
-  "6913 CERAMIC HOUSEHOLD ARTICLES",
+  "0901 COFFEE",
+  "1006 RICE",
+  "1704 SUGAR CONFECTIONERY",
+  "1806 CHOCOLATE AND COCOA PREPARATIONS",
+  "2106 FOOD PREPARATIONS NEC",
   "2204210000 WINE OF FRESH GRAPES",
-  "8409990000 ENGINE PARTS NEC",
-  "9503000000 TOYS AND GAMES",
+  "3004 MEDICAMENTS FOR RETAIL SALE",
+  "3304 BEAUTY OR MAKE-UP PREPARATIONS",
+  "3305 PREPARATIONS FOR USE ON HAIR",
+  "3401 SOAP",
+  "3923 PLASTIC ARTICLES FOR PACKING",
+  "4202 TRUNKS SUITCASES HANDBAGS WALLETS",
+  "4820 REGISTERS BOOKS NOTEBOOKS STATIONERY",
+  "4901 PRINTED BOOKS BROCHURES",
+  "4907 STAMPS CHEQUE FORMS BANKNOTES",
+  "4911 OTHER PRINTED MATTER",
+  "6104 WOMEN KNITTED SUITS DRESSES SKIRTS",
   "6109100000 T-SHIRTS COTTON",
+  "6110 JERSEYS PULLOVERS SWEATSHIRTS WAISTCOATS",
+  "6115 HOSIERY SOCKS STOCKINGS",
+  "6204 WOMEN SUITS ENSEMBLES DRESSES",
+  "6205 MEN SHIRTS",
+  "6211 TRACKSUITS SKI SUITS SWIMWEAR",
+  "6302 BED LINEN TABLE LINEN TOILET LINEN",
+  "6403 FOOTWEAR WITH OUTER SOLES OF RUBBER",
+  "6404 FOOTWEAR WITH OUTER SOLES OF RUBBER TEXTILE UPPERS",
+  "6506 HEADGEAR",
+  "6913 CERAMIC HOUSEHOLD ARTICLES",
+  "7113 ARTICLES OF JEWELRY",
+  "7117 IMITATION JEWELRY",
+  "7321 STOVES RANGES GRATES COOKERS",
+  "8409990000 ENGINE PARTS NEC",
+  "8414 AIR OR VACUUM PUMPS COMPRESSORS FANS",
+  "8418 REFRIGERATORS FREEZERS",
+  "8443 PRINTING MACHINERY PRINTERS COPIERS",
+  "8471300000 PORTABLE DIGITAL ADP MACHINES LAPTOPS",
+  "8504 ELECTRICAL TRANSFORMERS POWER SUPPLIES",
+  "8507 ELECTRIC ACCUMULATORS BATTERIES",
+  "8516 ELECTRIC WATER HEATERS HAIR DRYERS IRONS",
+  "8517130000 SMARTPHONES TELEPHONES",
+  "8518 MICROPHONES LOUDSPEAKERS HEADPHONES",
+  "8521 VIDEO RECORDING APPARATUS",
+  "8523 DISCS TAPES STORAGE MEDIA",
+  "8525 CAMERAS TV CAMERAS",
+  "8528 MONITORS AND PROJECTORS TELEVISION RECEIVERS",
+  "8534 PRINTED CIRCUITS",
+  "8536 ELECTRICAL SWITCHES CONNECTORS",
+  "8541 DIODES TRANSISTORS SEMICONDUCTORS",
+  "8544 INSULATED WIRE CABLE",
+  "8708 MOTOR VEHICLE PARTS AND ACCESSORIES",
+  "9006 PHOTOGRAPHIC CAMERAS FLASH",
+  "9018 MEDICAL INSTRUMENTS AND APPLIANCES",
+  "9021 ORTHOPEDIC APPLIANCES HEARING AIDS",
+  "9101 WRIST-WATCHES POCKET-WATCHES",
+  "9102 WRIST-WATCHES OTHER",
+  "9403 OTHER FURNITURE",
+  "9503000000 TOYS AND GAMES",
+  "9504 VIDEO GAME CONSOLES",
+  "9506 SPORTS EQUIPMENT",
+  "9608 BALL POINT PENS FELT TIPPED PENS",
+  "9706 ANTIQUES OVER 100 YEARS OLD",
 ];
 
 const DHL_PACKAGING_OPTIONS = [
@@ -201,7 +254,7 @@ interface AddItemModalProps {
 
 function AddItemModal({ item, onSave, onCancel, isEdit }: AddItemModalProps) {
   const [qty, setQty] = useState(item.quantity ?? "1");
-  const [unit, setUnit] = useState(item.unit ?? "Piece");
+  const [unit, setUnit] = useState(item.unit ?? "PCE");
   const [coo, setCoo] = useState(item.countryOfOrigin ?? "");
   const [desc, setDesc] = useState(item.description ?? "");
   const [commodity, setCommodity] = useState(item.commodity ?? "");
@@ -231,11 +284,30 @@ function AddItemModal({ item, onSave, onCancel, isEdit }: AddItemModalProps) {
             <div>
               <label style={{ fontSize: "12px", color: "#333", display: "block", marginBottom: "2px" }}>Unit <span style={{ color: "#D40511" }}>*</span></label>
               <select className="w-full border border-gray-300 rounded-sm px-2 py-2.5 md:py-1 text-base md:text-sm" value={unit} onChange={(e) => setUnit(e.target.value)}>
-                <option>Piece</option>
-                <option>Box</option>
-                <option>Set</option>
-                <option>Pair</option>
-                <option>Kilogram</option>
+                <option value="">Type and select a unit</option>
+                <option value="PCE">Piece - PCE</option>
+                <option value="BOX">Box - BOX</option>
+                <option value="CM">Centimeter - CM</option>
+                <option value="COM">Combined pallets and boxes - COM</option>
+                <option value="CM3">Cubic Centimeter - CM3</option>
+                <option value="FT3">Cubic Feet - FT3</option>
+                <option value="M3">Cubic Meter - M3</option>
+                <option value="YD3">Cubic Yard - YD3</option>
+                <option value="DEG">Degrees - DEG</option>
+                <option value="FT">Feet - FT</option>
+                <option value="IN">Inches - IN</option>
+                <option value="KG">Kilogram - KG</option>
+                <option value="KM">Kilometer - KM</option>
+                <option value="KMS">Kilometer per second - KMS</option>
+                <option value="M">Meter - M</option>
+                <option value="MS">Meter per second - MS</option>
+                <option value="MI">Mile - MI</option>
+                <option value="NMB">Number - NMB</option>
+                <option value="PAL">Pallet - PAL</option>
+                <option value="PRT">Part/Article - PRT</option>
+                <option value="LB">Pounds - LB</option>
+                <option value="RAD">Radians - RAD</option>
+                <option value="YD">Yard - YD</option>
               </select>
             </div>
           </div>
@@ -243,7 +315,7 @@ function AddItemModal({ item, onSave, onCancel, isEdit }: AddItemModalProps) {
             <label style={{ fontSize: "12px", color: "#333", display: "block", marginBottom: "2px" }}>Country of Origin <span style={{ color: "#D40511" }}>*</span></label>
             <select className="w-full border border-gray-300 rounded-sm px-2 py-2.5 md:py-1 text-base md:text-sm" value={coo} onChange={(e) => setCoo(e.target.value)}>
               <option value="">Select...</option>
-              {COUNTRY_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.value} - {o.label}</option>)}
+              {COUNTRY_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label.toUpperCase()} - {o.value}</option>)}
             </select>
           </div>
           <div>
@@ -1044,15 +1116,17 @@ export default function CRAForm({ form, onChange, fieldResults, disabled, onSave
                     label="Invoice Type"
                     value={form.commercialInvoice.invoiceType}
                     onChange={(v) => updateCI("invoiceType", v)}
-                    options={[{ value: "Commercial Invoice", label: "Commercial Invoice" }]}
+                    options={[{ value: "Commercial Invoice", label: "Commercial Invoice" }, { value: "Pro-Forma", label: "Pro-Forma" }]}
                     disabled={disabled}
                     required
+                    placeholder="Select an invoice type"
                   />
                   <CraSelect
                     label="Trading Transaction Type"
                     value={form.commercialInvoice.tradingTransactionType}
                     onChange={(v) => updateCI("tradingTransactionType", v)}
-                    options={[{ value: "Commercial", label: "Commercial" }]}
+                    options={[{ value: "Personal", label: "Personal" }, { value: "Commercial", label: "Commercial" }]}
+                    placeholder="Type and select a transaction type"
                     disabled={disabled}
                   />
                 </div>
