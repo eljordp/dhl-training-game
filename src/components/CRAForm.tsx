@@ -34,6 +34,12 @@ const PHONE_CODES: Record<string, string> = {
   MA: "+212", TN: "+216", DZ: "+213", LY: "+218", SD: "+249", SN: "+221", CM: "+237", CI: "+225",
   MN: "+976", KH: "+855", LA: "+856", MM: "+95", BN: "+673", FJ: "+679", PG: "+675",
   IS: "+354", LU: "+352", MT: "+356", CY: "+357", AL: "+355", MD: "+373",
+  YE: "+967", MR: "+222", BF: "+226", SS: "+211", TL: "+670", TO: "+676", VU: "+678",
+  AO: "+244", BJ: "+229", BW: "+267", BI: "+257", KM: "+269", CG: "+242", GM: "+220",
+  GN: "+224", GW: "+245", LS: "+266", LR: "+231", MG: "+261", MW: "+265", ML: "+223",
+  MZ: "+258", NA: "+264", NE: "+227", RW: "+250", SC: "+248", TG: "+228", ZM: "+260", ZW: "+263",
+  MU: "+230", MV: "+960", AF: "+93", KP: "+850", RE: "+262", GF: "+594", GP: "+590", PF: "+689",
+  KY: "+1", PR: "+1", VI: "+1", BM: "+1",
 };
 
 function getPhoneCode(countryCode: string): string {
@@ -844,7 +850,7 @@ export default function CRAForm({ form, onChange, fieldResults, disabled, onSave
                 <div>
                   <label style={{ fontSize: "12px", color: "#333", display: "block", marginBottom: "2px" }}>Phone 1 <span style={{ color: "#D40511" }}>*</span></label>
                   <div className="flex gap-1">
-                    <span className="border border-gray-300 rounded-sm px-2 py-1 bg-gray-100 text-gray-500 text-xs flex items-center">+1</span>
+                    <span className="border border-gray-300 rounded-sm px-2 py-1 bg-gray-100 text-gray-500 text-xs flex items-center">{getPhoneCode(form.shipmentInfo.originCountry)}</span>
                     <input
                       type="text"
                       className={`flex-1 bg-white border rounded-sm px-2 py-1 focus:outline-none focus:border-[#D40511] ${inputBorderClass(fr["shipper.phone"])} disabled:bg-gray-100`}
