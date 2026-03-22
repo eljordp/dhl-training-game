@@ -67,10 +67,11 @@ interface Product {
 }
 
 const PRODUCTS: Product[] = [
-  { name: "DHL Express Worldwide", code: "P", serviceType: "EXPRESS_WORLDWIDE", deliveryDays: 3, baseRate: 3.85, fuelSurcharge: 0.23, directSignature: 7.6 },
-  { name: "DHL Express 9:00", code: "9", serviceType: "EXPRESS_9:00", deliveryDays: 1, baseRate: 5.5, fuelSurcharge: 0.23, directSignature: 7.6 },
-  { name: "DHL Express 12:00", code: "12", serviceType: "EXPRESS_12:00", deliveryDays: 2, baseRate: 4.75, fuelSurcharge: 0.23, directSignature: 7.6 },
-  { name: "DHL Economy Select", code: "D", serviceType: "ECONOMY_SELECT", deliveryDays: 5, baseRate: 2.1, fuelSurcharge: 0.18, directSignature: 7.6 },
+  { name: "EXPRESS DOMESTIC", code: "N", serviceType: "EXPRESS_DOMESTIC", deliveryDays: 2, baseRate: 2.75, fuelSurcharge: 0.23, directSignature: 7.6 },
+  { name: "EXPRESS WORLDWIDE", code: "P", serviceType: "EXPRESS_WORLDWIDE", deliveryDays: 3, baseRate: 3.85, fuelSurcharge: 0.23, directSignature: 7.6 },
+  { name: "EXPRESS 9:00", code: "9", serviceType: "EXPRESS_9:00", deliveryDays: 1, baseRate: 5.5, fuelSurcharge: 0.23, directSignature: 7.6 },
+  { name: "EXPRESS 12:00", code: "12", serviceType: "EXPRESS_12:00", deliveryDays: 2, baseRate: 4.75, fuelSurcharge: 0.23, directSignature: 7.6 },
+  { name: "ECONOMY SELECT", code: "D", serviceType: "ECONOMY_SELECT", deliveryDays: 5, baseRate: 2.1, fuelSurcharge: 0.18, directSignature: 7.6 },
 ];
 
 function getDeliveryDate(days: number): string {
@@ -84,92 +85,6 @@ function getDeliveryDate(days: number): string {
   return d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
 }
 
-function calcCost(product: Product, weight: number) {
-  const weightCharge = Math.max(weight, 1) * product.baseRate;
-  const fuelCharge = weightCharge * product.fuelSurcharge;
-  const subtotal = weightCharge + fuelCharge + product.directSignature;
-  return { weightCharge, fuelCharge, subtotal };
-}
-
-interface ProductCardProps {
-  product: Product;
-  weight: number;
-  isCorrect: boolean;
-  onSelect: (serviceType: string) => void;
-}
-
-function ProductCard({ product, weight, isCorrect, onSelect }: ProductCardProps) {
-  const { weightCharge, fuelCharge, subtotal } = calcCost(product, weight);
-  const deliveryDate = getDeliveryDate(product.deliveryDays);
-
-  return (
-    <div
-      className="border rounded-sm overflow-hidden flex flex-col min-w-0 md:min-w-[220px]"
-      style={{ borderColor: isCorrect ? "#FFCC00" : "#ccc", borderWidth: isCorrect ? "2px" : "1px" }}
-    >
-      <div className="px-3 py-2" style={{ background: isCorrect ? "#FFCC00" : "#f5f5f5", borderBottom: "1px solid #ccc" }}>
-        <div style={{ fontWeight: "bold", fontSize: "13px" }}>{product.name}</div>
-        <div style={{ fontSize: "11px", color: "#555" }}>Est. Delivery: {deliveryDate}</div>
-      </div>
-      <div className="flex-1 p-2">
-        <table className="w-full text-xs">
-          <thead>
-            <tr style={{ background: "#FFCC00" }}>
-              <th className="px-2 py-1 text-left font-bold border border-gray-200">Product (Code)</th>
-              <th className="px-2 py-1 text-right font-bold border border-gray-200">Value</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td className="px-2 py-0.5 border border-gray-200">{product.name} ({product.code})</td>
-              <td className="px-2 py-0.5 border border-gray-200 text-right">${subtotal.toFixed(2)}</td>
-            </tr>
-            <tr>
-              <td className="px-2 py-0.5 border border-gray-200">Discount</td>
-              <td className="px-2 py-0.5 border border-gray-200 text-right">0.00</td>
-            </tr>
-            <tr>
-              <td className="px-2 py-0.5 border border-gray-200">Weight Charge</td>
-              <td className="px-2 py-0.5 border border-gray-200 text-right">${weightCharge.toFixed(2)}</td>
-            </tr>
-          </tbody>
-        </table>
-
-        <div style={{ marginTop: "6px", fontSize: "11px", fontWeight: "bold", color: "#555" }}>Extracharges</div>
-        <table className="w-full text-xs mt-1">
-          <tbody>
-            <tr>
-              <td className="px-2 py-0.5 border border-gray-200">Fuel Surcharge (FF)</td>
-              <td className="px-2 py-0.5 border border-gray-200 text-right">${fuelCharge.toFixed(2)}</td>
-            </tr>
-            <tr>
-              <td className="px-2 py-0.5 border border-gray-200">Direct Signature (SF)</td>
-              <td className="px-2 py-0.5 border border-gray-200 text-right">${product.directSignature.toFixed(2)}</td>
-            </tr>
-          </tbody>
-        </table>
-
-        <table className="w-full text-xs mt-1">
-          <tbody>
-            <tr style={{ fontWeight: "bold" }}>
-              <td className="px-2 py-0.5 border border-gray-200">Grand Total</td>
-              <td className="px-2 py-0.5 border border-gray-200 text-right">${subtotal.toFixed(2)}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <div className="px-3 py-2 border-t border-gray-200">
-        <button
-          onClick={() => onSelect(product.serviceType)}
-          className="w-full py-1.5 text-sm font-bold text-white rounded-sm cursor-pointer"
-          style={{ background: "#28a745" }}
-        >
-          Select
-        </button>
-      </div>
-    </div>
-  );
-}
 
 interface ProductsModalProps {
   form: ShipmentForm;
@@ -178,47 +93,244 @@ interface ProductsModalProps {
   onCancel: () => void;
 }
 
+const PROMO_CODES: Record<string, number> = {
+  LOVE15: 0.15,
+  LOVE50: 0.50,
+};
+
 function ProductsModal({ form, correctServiceType, onSelect, onCancel }: ProductsModalProps) {
   const weight = parseFloat(form.shipmentInfo.weight) || 1;
+  const isDomestic = form.shipmentInfo.originCountry === form.shipmentInfo.destinationCountry;
 
-  // Primary product = correct service type; secondary = next best alternative
-  const primary = PRODUCTS.find((p) => p.serviceType === correctServiceType) || PRODUCTS[0];
-  const secondary = PRODUCTS.find((p) => p.serviceType !== correctServiceType) || PRODUCTS[1];
+  // Filter products based on domestic/international
+  const availableProducts = isDomestic
+    ? PRODUCTS.filter((p) => p.serviceType === "EXPRESS_DOMESTIC")
+    : PRODUCTS.filter((p) => p.serviceType !== "EXPRESS_DOMESTIC");
+
+  const [selectedIdx, setSelectedIdx] = useState(0);
+  const [fuelChecked, setFuelChecked] = useState(true);
+  const [goGreenChecked, setGoGreenChecked] = useState(false);
+  const [directSigChecked, setDirectSigChecked] = useState(false);
+  const [promoCode, setPromoCode] = useState("");
+  const [promoApplied, setPromoApplied] = useState<string | null>(null);
+  const [showPromo, setShowPromo] = useState(false);
+
+  const product = availableProducts[selectedIdx] || PRODUCTS[0];
+  const weightCharge = Math.max(weight, 1) * product.baseRate;
+  const discount = promoApplied && PROMO_CODES[promoApplied] ? weightCharge * PROMO_CODES[promoApplied] : 0;
+  const discountedWeight = weightCharge - discount;
+  const fuelCharge = fuelChecked ? discountedWeight * product.fuelSurcharge : 0;
+  const goGreenCharge = goGreenChecked ? discountedWeight * 0.02 : 0;
+  const directSigCharge = directSigChecked ? product.directSignature : 0;
+  const otherCharges = fuelCharge + goGreenCharge + directSigCharge;
+  const subtotal = discountedWeight + otherCharges;
+  const grandTotal = subtotal;
+  const deliveryDate = getDeliveryDate(product.deliveryDays);
+
+  const handleApplyPromo = () => {
+    const code = promoCode.toUpperCase().trim();
+    if (PROMO_CODES[code]) {
+      setPromoApplied(code);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.6)" }}>
-      <div className="bg-white rounded shadow-xl w-full max-w-2xl mx-4 overflow-hidden" style={{ fontFamily: "Arial, sans-serif" }}>
+      <div className="bg-white rounded shadow-xl w-full max-w-lg mx-4 overflow-hidden max-h-[90vh] overflow-y-auto" style={{ fontFamily: "Arial, sans-serif" }}>
         {/* Header */}
         <div className="px-4 py-3 border-b border-gray-300 flex items-center justify-between" style={{ background: "#f5f5f5" }}>
           <span style={{ fontWeight: "bold", fontSize: "16px" }}>Products</span>
-          <span style={{ fontSize: "12px", color: "#555" }}>Currency: USD</span>
+          <button onClick={onCancel} className="text-xl font-bold text-gray-500 hover:text-black cursor-pointer">×</button>
         </div>
 
-        {/* Product cards */}
-        <div className="p-4 flex flex-col md:flex-row gap-4 overflow-x-auto">
-          <ProductCard
-            product={primary}
-            weight={weight}
-            isCorrect={true}
-            onSelect={onSelect}
-          />
-          <ProductCard
-            product={secondary}
-            weight={weight}
-            isCorrect={false}
-            onSelect={onSelect}
-          />
+        <div className="p-4">
+          {/* Currency */}
+          <div className="flex items-center gap-2 mb-3">
+            <span style={{ fontSize: "12px", color: "#555" }}>Currency</span>
+            <select className="border border-gray-300 rounded-sm px-2 py-1 text-sm" defaultValue="USD">
+              <option>USD</option>
+            </select>
+          </div>
+
+          {/* Product selector tabs (if multiple products available) */}
+          {availableProducts.length > 1 && (
+            <div className="flex gap-1 mb-3">
+              {availableProducts.map((p, i) => (
+                <button
+                  key={p.code}
+                  onClick={() => setSelectedIdx(i)}
+                  className="px-3 py-1.5 text-xs font-bold rounded-sm border cursor-pointer"
+                  style={{
+                    background: i === selectedIdx ? "#FFCC00" : "white",
+                    borderColor: i === selectedIdx ? "#FFCC00" : "#ccc",
+                  }}
+                >
+                  {p.name} ({p.code})
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Estimated Delivery & Cost */}
+          <table className="w-full text-sm mb-2 border border-gray-200">
+            <thead>
+              <tr style={{ background: "#FFCC00" }}>
+                <th className="px-3 py-2 text-left font-bold border border-gray-200">Estimated Delivery Date</th>
+                <th className="px-3 py-2 text-right font-bold border border-gray-200">Estimated Cost</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className="px-3 py-2 border border-gray-200">{deliveryDate}</td>
+                <td className="px-3 py-2 border border-gray-200 text-right font-bold">{grandTotal.toFixed(2)}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          {/* Product (Code) */}
+          <table className="w-full text-sm border border-gray-200">
+            <thead>
+              <tr style={{ background: "#FFCC00" }}>
+                <th className="px-3 py-1.5 text-left font-bold border border-gray-200">Product (Code)</th>
+                <th className="px-3 py-1.5 text-right font-bold border border-gray-200">Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className="px-3 py-1 border border-gray-200">{product.name} ({product.code})</td>
+                <td className="px-3 py-1 border border-gray-200 text-right">{weightCharge.toFixed(2)}</td>
+              </tr>
+              <tr>
+                <td className="px-3 py-1 border border-gray-200">Discount</td>
+                <td className="px-3 py-1 border border-gray-200 text-right">{discount > 0 ? `-${discount.toFixed(2)}` : "0.00"}</td>
+              </tr>
+              <tr style={{ fontWeight: "bold" }}>
+                <td className="px-3 py-1 border border-gray-200">Weight Charge</td>
+                <td className="px-3 py-1 border border-gray-200 text-right">{discountedWeight.toFixed(2)}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          {/* Extracharges */}
+          <table className="w-full text-sm mt-2 border border-gray-200">
+            <thead>
+              <tr style={{ background: "#FFCC00" }}>
+                <th className="px-1 py-1.5 w-8 border border-gray-200"></th>
+                <th className="px-3 py-1.5 text-left font-bold border border-gray-200">Extracharge (Code)</th>
+                <th className="px-3 py-1.5 text-right font-bold border border-gray-200">Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className="px-1 py-1 border border-gray-200 text-center">
+                  <input type="checkbox" checked={fuelChecked} onChange={(e) => setFuelChecked(e.target.checked)} className="w-4 h-4 accent-green-600" />
+                </td>
+                <td className="px-3 py-1 border border-gray-200">Fuel Surcharge (FF)</td>
+                <td className="px-3 py-1 border border-gray-200 text-right">{fuelCharge.toFixed(2)}</td>
+              </tr>
+              <tr>
+                <td className="px-1 py-1 border border-gray-200 text-center">
+                  <input type="checkbox" checked={goGreenChecked} onChange={(e) => setGoGreenChecked(e.target.checked)} className="w-4 h-4" />
+                </td>
+                <td className="px-3 py-1 border border-gray-200">Go Green Plus (FT)</td>
+                <td className="px-3 py-1 border border-gray-200 text-right">{goGreenCharge.toFixed(2)}</td>
+              </tr>
+              <tr>
+                <td className="px-1 py-1 border border-gray-200 text-center">
+                  <input type="checkbox" checked={directSigChecked} onChange={(e) => setDirectSigChecked(e.target.checked)} className="w-4 h-4" />
+                </td>
+                <td className="px-3 py-1 border border-gray-200">Direct Signature (SF)</td>
+                <td className="px-3 py-1 border border-gray-200 text-right">{directSigCharge.toFixed(2)}</td>
+              </tr>
+              <tr style={{ fontWeight: "bold" }}>
+                <td className="border border-gray-200"></td>
+                <td className="px-3 py-1 border border-gray-200">Other Charges</td>
+                <td className="px-3 py-1 border border-gray-200 text-right">{otherCharges.toFixed(2)}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          {/* Subtotal / Grand Total */}
+          <table className="w-full text-sm mt-2 border border-gray-200">
+            <thead>
+              <tr style={{ background: "#FFCC00" }}>
+                <th className="px-3 py-1.5 text-left font-bold border border-gray-200">Description</th>
+                <th className="px-3 py-1.5 text-right font-bold border border-gray-200">Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className="px-3 py-1 border border-gray-200">Subtotal</td>
+                <td className="px-3 py-1 border border-gray-200 text-right">{subtotal.toFixed(2)}</td>
+              </tr>
+              <tr style={{ fontWeight: "bold" }}>
+                <td className="px-3 py-1 border border-gray-200">Grand Total</td>
+                <td className="px-3 py-1 border border-gray-200 text-right">{grandTotal.toFixed(2)}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          {/* Promo applied badge */}
+          {promoApplied && (
+            <div className="mt-2 text-xs text-green-700 font-bold">
+              ✓ Promo {promoApplied} applied ({(PROMO_CODES[promoApplied] * 100).toFixed(0)}% off)
+            </div>
+          )}
+
+          {/* Report Error */}
+          <label className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer mt-3">
+            <input type="checkbox" className="w-3.5 h-3.5" />
+            Report Error ?
+          </label>
         </div>
+
+        {/* Add Promotionals */}
+        {showPromo ? (
+          <div className="px-4 pb-2">
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                value={promoCode}
+                onChange={(e) => setPromoCode(e.target.value)}
+                placeholder="Enter promo code (e.g. LOVE15)"
+                className="border border-gray-300 rounded-sm px-3 py-1.5 text-sm flex-1"
+              />
+              <button
+                onClick={handleApplyPromo}
+                className="px-4 py-1.5 text-sm font-bold text-white rounded-sm cursor-pointer"
+                style={{ background: "#28a745" }}
+              >
+                Apply
+              </button>
+            </div>
+            {promoCode && !PROMO_CODES[promoCode.toUpperCase().trim()] && (
+              <div className="text-xs text-red-600 mt-1">Invalid promo code. Try LOVE15 or get manager approval.</div>
+            )}
+          </div>
+        ) : (
+          <div className="px-4 pb-2 flex justify-center">
+            <button
+              onClick={() => setShowPromo(true)}
+              className="px-4 py-1.5 text-sm font-bold text-white rounded-sm cursor-pointer"
+              style={{ background: "#333" }}
+            >
+              Add Promotionals
+            </button>
+          </div>
+        )}
 
         {/* Footer */}
-        <div className="px-4 py-3 border-t border-gray-200 flex items-center justify-between">
-          <label className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer">
-            <input type="checkbox" className="w-3.5 h-3.5" />
-            Report Error?
-          </label>
+        <div className="px-4 py-3 border-t border-gray-200 flex items-center justify-end gap-3">
+          <button
+            onClick={() => onSelect(product.serviceType)}
+            className="px-6 py-1.5 text-sm font-bold rounded-sm cursor-pointer border border-gray-300"
+            style={{ background: "white" }}
+          >
+            Select
+          </button>
           <button
             onClick={onCancel}
-            className="px-4 py-1.5 text-sm font-bold text-white rounded-sm cursor-pointer"
+            className="px-6 py-1.5 text-sm font-bold text-white rounded-sm cursor-pointer"
             style={{ background: "#D40511" }}
           >
             Cancel
