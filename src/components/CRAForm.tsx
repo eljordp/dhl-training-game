@@ -756,23 +756,42 @@ export default function CRAForm({ form, onChange, fieldResults, disabled, onSave
                   id="acct-shipment"
                   className="w-3.5 h-3.5"
                   checked={form.shipmentInfo.accountShipment}
-                  onChange={(e) => updateShipmentInfo("accountShipment", e.target.checked)}
+                  onChange={(e) => {
+                    updateShipmentInfo("accountShipment", e.target.checked);
+                    if (e.target.checked) {
+                      updateShipmentInfo("accountNumber", "");
+                    } else {
+                      updateShipmentInfo("accountNumber", "CASHUS001");
+                    }
+                  }}
                   disabled={disabled}
                 />
                 <label htmlFor="acct-shipment" style={{ fontSize: "12px", color: "#555" }}>Account Shipment</label>
               </div>
               <div className="mb-3">
-                <CraSelect
-                  label="Account Number"
-                  value={form.shipmentInfo.accountNumber}
-                  onChange={(v) => updateShipmentInfo("accountNumber", v)}
-                  options={[
-                    { value: "CASHUS001", label: "CASHUS001 - CASH" },
-                  ]}
-                  disabled={disabled}
-                  required
-                  placeholder="CASHUS001 - CASH"
-                />
+                {form.shipmentInfo.accountShipment ? (
+                  <CraInput
+                    label="Account Number"
+                    value={form.shipmentInfo.accountNumber}
+                    onChange={(v) => updateShipmentInfo("accountNumber", v)}
+                    result={fr["shipmentInfo.accountNumber"]}
+                    disabled={disabled}
+                    required
+                    placeholder="Enter account number"
+                  />
+                ) : (
+                  <CraSelect
+                    label="Account Number"
+                    value={form.shipmentInfo.accountNumber || "CASHUS001"}
+                    onChange={(v) => updateShipmentInfo("accountNumber", v)}
+                    options={[
+                      { value: "CASHUS001", label: "CASHUS001 - CASH" },
+                    ]}
+                    disabled={disabled}
+                    required
+                    placeholder="CASHUS001 - CASH"
+                  />
+                )}
               </div>
 
               <SectionHeader>Origin <span style={{ color: "#D40511" }}>*</span></SectionHeader>
