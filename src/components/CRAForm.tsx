@@ -363,7 +363,29 @@ export default function CRAForm({ form, onChange, fieldResults, disabled, onSave
   const fr = fieldResults || {};
 
   const updateShipmentInfo = (field: string, value: string | boolean) => {
-    onChange({ ...form, shipmentInfo: { ...form.shipmentInfo, [field]: value } });
+    const updatedInfo = { ...form.shipmentInfo, [field]: value };
+    let updatedShipper = form.shipper;
+    let updatedConsignee = form.consignee;
+
+    // Auto-sync Origin → Shipper
+    if (field === "originCountry") {
+      const countryLabel = COUNTRIES.find((c) => c.code === value)?.name || "";
+      updatedShipper = { ...updatedShipper, country: countryLabel };
+    }
+    if (field === "originCity") updatedShipper = { ...updatedShipper, city: value as string };
+    if (field === "originZip") updatedShipper = { ...updatedShipper, zip: value as string };
+    if (field === "originSuburb") updatedShipper = { ...updatedShipper, suburb: value as string };
+
+    // Auto-sync Destination → Consignee
+    if (field === "destinationCountry") {
+      const countryLabel = COUNTRIES.find((c) => c.code === value)?.name || "";
+      updatedConsignee = { ...updatedConsignee, country: countryLabel };
+    }
+    if (field === "destinationCity") updatedConsignee = { ...updatedConsignee, city: value as string };
+    if (field === "destinationZip") updatedConsignee = { ...updatedConsignee, zip: value as string };
+    if (field === "destinationSuburb") updatedConsignee = { ...updatedConsignee, suburb: value as string };
+
+    onChange({ ...form, shipmentInfo: updatedInfo, shipper: updatedShipper, consignee: updatedConsignee });
   };
   const updateShipper = (field: string, value: string) => {
     onChange({ ...form, shipper: { ...form.shipper, [field]: value } });
@@ -467,14 +489,28 @@ export default function CRAForm({ form, onChange, fieldResults, disabled, onSave
 
               {/* Account Shipment */}
               <div className="flex items-center gap-2 mb-3">
-                <input type="checkbox" id="acct-shipment" className="w-3.5 h-3.5" disabled />
+                <input
+                  type="checkbox"
+                  id="acct-shipment"
+                  className="w-3.5 h-3.5"
+                  checked={form.shipmentInfo.accountShipment}
+                  onChange={(e) => updateShipmentInfo("accountShipment", e.target.checked)}
+                  disabled={disabled}
+                />
                 <label htmlFor="acct-shipment" style={{ fontSize: "12px", color: "#555" }}>Account Shipment</label>
               </div>
               <div className="mb-3">
-                <label style={{ fontSize: "12px", color: "#333", display: "block", marginBottom: "2px" }}>Account Number</label>
-                <select className="w-full border border-gray-300 rounded-sm px-2 py-1 bg-gray-100 text-gray-500" style={{ fontSize: "13px" }} disabled>
-                  <option>CASHUS078 - CASH</option>
-                </select>
+                <CraSelect
+                  label="Account Number"
+                  value={form.shipmentInfo.accountNumber}
+                  onChange={(v) => updateShipmentInfo("accountNumber", v)}
+                  options={[
+                    { value: "CASHUS001", label: "CASHUS001 - CASH" },
+                  ]}
+                  disabled={disabled}
+                  required
+                  placeholder="CASHUS001 - CASH"
+                />
               </div>
 
               <SectionHeader>Origin <span style={{ color: "#D40511" }}>*</span></SectionHeader>
@@ -490,7 +526,7 @@ export default function CRAForm({ form, onChange, fieldResults, disabled, onSave
                 />
                 <CraInput label="City" value={form.shipmentInfo.originCity} onChange={(v) => updateShipmentInfo("originCity", v)} result={fr["shipmentInfo.originCity"]} disabled={disabled} required />
                 <CraInput label="Zip" value={form.shipmentInfo.originZip} onChange={(v) => updateShipmentInfo("originZip", v)} result={fr["shipmentInfo.originZip"]} disabled={disabled} required />
-                <CraInput label="Suburb/County" value="" onChange={() => {}} disabled={disabled} />
+                <CraInput label="Suburb/County" value={form.shipmentInfo.originSuburb} onChange={(v) => updateShipmentInfo("originSuburb", v)} disabled={disabled} placeholder="Type and select a suburb" />
               </div>
 
               <SectionHeader>Destination <span style={{ color: "#D40511" }}>*</span></SectionHeader>
@@ -517,7 +553,7 @@ export default function CRAForm({ form, onChange, fieldResults, disabled, onSave
                 />
                 <CraInput label="City" value={form.shipmentInfo.destinationCity} onChange={(v) => updateShipmentInfo("destinationCity", v)} result={fr["shipmentInfo.destinationCity"]} disabled={disabled} required />
                 <CraInput label="Zip" value={form.shipmentInfo.destinationZip} onChange={(v) => updateShipmentInfo("destinationZip", v)} result={fr["shipmentInfo.destinationZip"]} disabled={disabled} required />
-                <CraInput label="Suburb/County" value="" onChange={() => {}} disabled={disabled} />
+                <CraInput label="Suburb/County" value={form.shipmentInfo.destinationSuburb} onChange={(v) => updateShipmentInfo("destinationSuburb", v)} disabled={disabled} placeholder="Type and select a suburb" />
               </div>
 
               {/* Shipment Creation Date */}
@@ -529,8 +565,17 @@ export default function CRAForm({ form, onChange, fieldResults, disabled, onSave
                 </div>
               </div>
 
-              <div className="mt-2">
-                <CraInput label="Promotion Code" value="" onChange={() => {}} disabled={disabled} />
+              <div className="mt-2 flex gap-2 items-end">
+                <div className="flex-1">
+                  <CraInput label="Promotion Code" value={form.shipmentInfo.promotionCode} onChange={(v) => updateShipmentInfo("promotionCode", v)} disabled={disabled} />
+                </div>
+                <button
+                  className="px-3 py-2.5 md:py-1 text-xs font-bold rounded-sm whitespace-nowrap"
+                  style={{ border: "1px solid #ccc", background: "white", color: "#333" }}
+                  disabled={disabled}
+                >
+                  Select Product
+                </button>
               </div>
 
               <div className="mt-2 space-y-2">
@@ -563,15 +608,31 @@ export default function CRAForm({ form, onChange, fieldResults, disabled, onSave
                   required
                 />
 
-                <div>
-                  <label style={{ fontSize: "12px", color: "#333", display: "block", marginBottom: "2px" }}>Declared/Protection Currency</label>
-                  <input type="text" className="w-full border border-gray-200 rounded-sm px-2 py-1 bg-gray-100 text-gray-500" style={{ fontSize: "13px" }} value="US Dollar - USD" readOnly disabled />
-                </div>
+                <CraSelect
+                  label="Declared/Protection Currency"
+                  value={form.shipmentInfo.currency}
+                  onChange={(v) => updateShipmentInfo("currency", v)}
+                  options={[
+                    { value: "USD", label: "US Dollar - USD" },
+                    { value: "EUR", label: "Euro - EUR" },
+                    { value: "GBP", label: "British Pound - GBP" },
+                    { value: "MXN", label: "Mexican Peso - MXN" },
+                    { value: "CAD", label: "Canadian Dollar - CAD" },
+                  ]}
+                  disabled={disabled}
+                />
 
                 <CraInput label="Declared Value" value={form.shipmentInfo.declaredValue} onChange={(v) => updateShipmentInfo("declaredValue", v)} result={fr["shipmentInfo.declaredValue"]} disabled={disabled} required type="number" placeholder="0.00" />
 
                 <div className="flex items-center gap-2">
-                  <input type="checkbox" id="protection" className="w-3.5 h-3.5" disabled />
+                  <input
+                    type="checkbox"
+                    id="protection"
+                    className="w-3.5 h-3.5"
+                    checked={form.shipmentInfo.protectionValue}
+                    onChange={(e) => updateShipmentInfo("protectionValue", e.target.checked)}
+                    disabled={disabled}
+                  />
                   <label htmlFor="protection" style={{ fontSize: "12px", color: "#555" }}>Protection Value</label>
                 </div>
               </div>
@@ -581,7 +642,27 @@ export default function CRAForm({ form, onChange, fieldResults, disabled, onSave
             <div className="bg-white border border-gray-200 p-3 rounded-sm">
               <div style={{ fontSize: "13px", fontWeight: "bold", color: "#222", marginBottom: "10px" }}>Pieces</div>
 
-              {/* Search Type and ID removed — not used in training */}
+              {/* Search Type and ID */}
+              <div className="grid grid-cols-2 gap-1.5 mb-3">
+                <CraSelect
+                  label="Search Type"
+                  value={form.shipmentInfo.searchType}
+                  onChange={(v) => updateShipmentInfo("searchType", v)}
+                  options={[
+                    { value: "Waybill", label: "Waybill" },
+                    { value: "Reference", label: "Reference" },
+                    { value: "Shipment", label: "Shipment" },
+                  ]}
+                  disabled={disabled}
+                  placeholder="Select a search type"
+                />
+                <CraInput
+                  label="ID"
+                  value={form.shipmentInfo.pieceId}
+                  onChange={(v) => updateShipmentInfo("pieceId", v)}
+                  disabled={disabled}
+                />
+              </div>
 
               {/* Pieces input row */}
               <div className="grid grid-cols-3 gap-1.5 mb-2">
@@ -631,20 +712,22 @@ export default function CRAForm({ form, onChange, fieldResults, disabled, onSave
                       <th className="border border-gray-300 px-2 py-1 text-left font-bold">Piece</th>
                       <th className="border border-gray-300 px-2 py-1 text-left font-bold">Weight (lb)</th>
                       <th className="border border-gray-300 px-2 py-1 text-left font-bold">Measurements (in)</th>
-                      <th className="border border-gray-300 px-2 py-1 text-left font-bold">Vol. Weight</th>
+                      <th className="border border-gray-300 px-2 py-1 text-left font-bold">Packaging Cost (USD)</th>
+                      <th className="border border-gray-300 px-2 py-1 text-left font-bold">Vol. Weight (lb)</th>
                       <th className="border border-gray-300 px-2 py-1 text-left font-bold">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {!piecesAdded ? (
                       <tr>
-                        <td colSpan={5} className="border border-gray-300 px-2 py-3 text-center text-gray-400">Please add pieces</td>
+                        <td colSpan={6} className="border border-gray-300 px-2 py-3 text-center text-gray-400">Please add pieces</td>
                       </tr>
                     ) : (
                       <tr>
                         <td className="border border-gray-300 px-2 py-1">{piecesQty}</td>
                         <td className="border border-gray-300 px-2 py-1">{piecesWeight}</td>
                         <td className="border border-gray-300 px-2 py-1">{piecesLength}×{piecesWidth}×{piecesHeight}</td>
+                        <td className="border border-gray-300 px-2 py-1 text-gray-400">—</td>
                         <td className="border border-gray-300 px-2 py-1">{volWeight()}</td>
                         <td className="border border-gray-300 px-2 py-1">
                           {!disabled && (
@@ -671,7 +754,7 @@ export default function CRAForm({ form, onChange, fieldResults, disabled, onSave
                 <CraInput label="Contact Name" value={form.shipper.contactName} onChange={(v) => updateShipper("contactName", v)} result={fr["shipper.contactName"]} disabled={disabled} required />
                 <div>
                   <label style={{ fontSize: "12px", color: "#333", display: "block", marginBottom: "2px" }}>Country</label>
-                  <input type="text" className="w-full border border-gray-200 rounded-sm px-2 py-1 bg-gray-100 text-gray-500" style={{ fontSize: "13px" }} value={form.shipmentInfo.originCountry} readOnly disabled />
+                  <input type="text" className="w-full border border-gray-200 rounded-sm px-2 py-1 bg-gray-100 text-gray-500" style={{ fontSize: "13px" }} value="US - UNITED STATES OF AMERICA" readOnly disabled />
                 </div>
                 <div>
                   <label style={{ fontSize: "12px", color: "#333", display: "block", marginBottom: "2px" }}>City</label>
@@ -681,17 +764,20 @@ export default function CRAForm({ form, onChange, fieldResults, disabled, onSave
                   <label style={{ fontSize: "12px", color: "#333", display: "block", marginBottom: "2px" }}>Zip</label>
                   <input type="text" className="w-full border border-gray-200 rounded-sm px-2 py-1 bg-gray-100 text-gray-500" style={{ fontSize: "13px" }} value={form.shipmentInfo.originZip} readOnly disabled />
                 </div>
-                <CraInput label="Suburb/County" value="" onChange={() => {}} disabled={disabled} />
+                <CraInput label="Suburb/County" value={form.shipper.suburb} onChange={(v) => updateShipper("suburb", v)} disabled={disabled} />
                 <CraInput label="Address 1" value={form.shipper.address1} onChange={(v) => updateShipper("address1", v)} result={fr["shipper.address1"]} disabled={disabled} required />
                 <CraInput label="Address 2" value={form.shipper.address2} onChange={(v) => updateShipper("address2", v)} disabled={disabled} />
-                <CraSelect
-                  label="Identification Type"
-                  value=""
-                  onChange={() => {}}
-                  options={[{ value: "PASSPORT", label: "Passport" }, { value: "DRIVER_LICENSE", label: "Driver License" }, { value: "NATIONAL_ID", label: "National ID" }]}
-                  disabled={disabled}
-                />
-                <CraInput label="Identification Number" value="" onChange={() => {}} disabled={disabled} />
+                <CraInput label="Address 3" value={form.shipper.address3} onChange={(v) => updateShipper("address3", v)} disabled={disabled} />
+                <div className="grid grid-cols-2 gap-2">
+                  <CraSelect
+                    label="Identification Type"
+                    value={form.shipper.identificationType}
+                    onChange={(v) => updateShipper("identificationType", v)}
+                    options={[{ value: "Passport", label: "Passport" }, { value: "Tax ID", label: "Tax ID" }, { value: "National ID", label: "National ID" }, { value: "Driver License", label: "Driver License" }]}
+                    disabled={disabled}
+                  />
+                  <CraInput label="Identification Number" value={form.shipper.identificationNumber} onChange={(v) => updateShipper("identificationNumber", v)} disabled={disabled} />
+                </div>
                 <div>
                   <label style={{ fontSize: "12px", color: "#333", display: "block", marginBottom: "2px" }}>Phone 1 <span style={{ color: "#D40511" }}>*</span></label>
                   <div className="flex gap-1">
@@ -756,17 +842,20 @@ export default function CRAForm({ form, onChange, fieldResults, disabled, onSave
                   <label style={{ fontSize: "12px", color: "#333", display: "block", marginBottom: "2px" }}>Zip</label>
                   <input type="text" className="w-full border border-gray-200 rounded-sm px-2 py-1 bg-gray-100 text-gray-500" style={{ fontSize: "13px" }} value={form.shipmentInfo.destinationZip} readOnly disabled />
                 </div>
-                <CraInput label="Suburb/County" value="" onChange={() => {}} disabled={disabled} />
+                <CraInput label="Suburb/County" value={form.consignee.suburb} onChange={(v) => updateConsignee("suburb", v)} disabled={disabled} />
                 <CraInput label="Address 1" value={form.consignee.address1} onChange={(v) => updateConsignee("address1", v)} result={fr["consignee.address1"]} disabled={disabled} required />
                 <CraInput label="Address 2" value={form.consignee.address2} onChange={(v) => updateConsignee("address2", v)} disabled={disabled} />
-                <CraSelect
-                  label="Identification Type"
-                  value=""
-                  onChange={() => {}}
-                  options={[{ value: "PASSPORT", label: "Passport" }, { value: "DRIVER_LICENSE", label: "Driver License" }, { value: "NATIONAL_ID", label: "National ID" }]}
-                  disabled={disabled}
-                />
-                <CraInput label="Identification Number" value="" onChange={() => {}} disabled={disabled} />
+                <CraInput label="Address 3" value={form.consignee.address3} onChange={(v) => updateConsignee("address3", v)} disabled={disabled} />
+                <div className="grid grid-cols-2 gap-2">
+                  <CraSelect
+                    label="Identification Type"
+                    value={form.consignee.identificationType}
+                    onChange={(v) => updateConsignee("identificationType", v)}
+                    options={[{ value: "Passport", label: "Passport" }, { value: "Tax ID", label: "Tax ID" }, { value: "National ID", label: "National ID" }, { value: "Driver License", label: "Driver License" }]}
+                    disabled={disabled}
+                  />
+                  <CraInput label="Identification Number" value={form.consignee.identificationNumber} onChange={(v) => updateConsignee("identificationNumber", v)} disabled={disabled} />
+                </div>
                 <div>
                   <label style={{ fontSize: "12px", color: "#333", display: "block", marginBottom: "2px" }}>Phone 1 <span style={{ color: "#D40511" }}>*</span></label>
                   <div className="flex gap-1">

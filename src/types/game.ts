@@ -2,15 +2,24 @@ export interface ShipmentInfoForm {
   originCountry: string;
   originCity: string;
   originZip: string;
+  originSuburb: string;
   destinationCountry: string;
   destinationCity: string;
   destinationZip: string;
+  destinationSuburb: string;
   residentialAddress: boolean;
+  accountShipment: boolean;
+  accountNumber: string;
+  searchType: string;
+  pieceId: string;
   description: string;
   contentType: "DOCUMENT" | "PACKAGE" | "";
   shipmentPurpose: string;
   declaredValue: string;
   currency: string;
+  shipmentDate: string;
+  promotionCode: string;
+  protectionValue: boolean;
   weight: string;
   length: string;
   width: string;
@@ -22,11 +31,18 @@ export interface ShipmentInfoForm {
 export interface PartyForm {
   companyName: string;
   contactName: string;
+  country: string;
+  city: string;
+  zip: string;
   address1: string;
   address2: string;
+  address3: string;
+  suburb: string;
   phone: string;
   email: string;
   partyTraderType: string;
+  identificationType: string;
+  identificationNumber: string;
 }
 
 export interface CustomsForm {
