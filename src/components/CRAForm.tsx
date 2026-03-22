@@ -324,24 +324,39 @@ function AddItemModal({ item, onSave, onCancel, isEdit }: AddItemModalProps) {
           </div>
           <div className="relative">
             <label style={{ fontSize: "12px", color: "#333", display: "block", marginBottom: "2px" }}>Commodity</label>
-            <input
-              type="text"
-              className="w-full border border-gray-300 rounded-sm px-2 py-2.5 md:py-1 text-base md:text-sm"
-              value={commodity}
-              onChange={(e) => { setCommodity(e.target.value); setShowSuggestions(true); }}
-              onFocus={() => setShowSuggestions(true)}
-              onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-              placeholder="Type to search..."
-            />
-            {showSuggestions && filtered.length > 0 && (
-              <div className="absolute z-10 w-full bg-white border border-gray-300 rounded shadow-sm max-h-40 overflow-y-auto">
-                {filtered.map((s) => (
-                  <div
-                    key={s}
-                    className="px-3 py-2.5 md:py-1.5 text-sm md:text-xs hover:bg-yellow-50 cursor-pointer"
-                    onMouseDown={() => { setCommodity(s); setShowSuggestions(false); }}
-                  >{s}</div>
-                ))}
+            <div
+              className="w-full border border-gray-300 rounded-sm px-2 py-2.5 md:py-1 text-base md:text-sm bg-white cursor-pointer flex items-center justify-between"
+              onClick={() => setShowSuggestions(!showSuggestions)}
+            >
+              <span className={commodity ? "text-[#333]" : "text-gray-400"}>
+                {commodity || "Select a commodity code"}
+              </span>
+              <span className="text-gray-400 text-xs">{showSuggestions ? "▲" : "▼"}</span>
+            </div>
+            {showSuggestions && (
+              <div className="absolute z-10 w-full bg-white border border-gray-300 rounded shadow-lg max-h-60 overflow-hidden flex flex-col">
+                <div className="p-1.5 border-b border-gray-200 sticky top-0 bg-white">
+                  <input
+                    type="text"
+                    className="w-full border border-gray-300 rounded-sm px-2 py-1.5 text-sm focus:outline-none focus:border-[#D40511]"
+                    placeholder="Search HS code or description..."
+                    value={commodity}
+                    onChange={(e) => setCommodity(e.target.value)}
+                    autoFocus
+                  />
+                </div>
+                <div className="overflow-y-auto max-h-48">
+                  {(commodity.length > 0 ? filtered : COMMODITY_SUGGESTIONS).map((s) => (
+                    <div
+                      key={s}
+                      className={`px-3 py-2.5 md:py-1.5 text-sm md:text-xs hover:bg-yellow-50 cursor-pointer border-b border-gray-100 ${commodity === s ? "bg-yellow-100 font-bold" : ""}`}
+                      onMouseDown={() => { setCommodity(s); setShowSuggestions(false); }}
+                    >{s}</div>
+                  ))}
+                  {commodity.length > 0 && filtered.length === 0 && (
+                    <div className="px-3 py-3 text-sm text-gray-400 text-center">No matching codes</div>
+                  )}
+                </div>
               </div>
             )}
           </div>
