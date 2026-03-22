@@ -20,6 +20,7 @@ export interface ShipmentInfoForm {
   shipmentDate: string;
   promotionCode: string;
   protectionValue: boolean;
+  protectionAmount: string;
   weight: string;
   length: string;
   width: string;

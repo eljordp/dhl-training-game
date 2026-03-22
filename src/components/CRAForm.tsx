@@ -51,6 +51,31 @@ const COMMODITY_SUGGESTIONS = [
   "6109100000 T-SHIRTS COTTON",
 ];
 
+const DHL_PACKAGING_OPTIONS = [
+  { name: "Box #2 - Cube", description: "", dimensions: "10.10 x 5.80 x 5.90", requiredWeight: 0.00 },
+  { name: "Box #2 - Medium (Pizza)", description: "", dimensions: "13.20 x 12.60 x 2.00", requiredWeight: 0.00 },
+  { name: "Box #2 - Small (Small Pizza)", description: "", dimensions: "12.50 x 11.10 x 1.50", requiredWeight: 0.00 },
+  { name: "Box #3", description: "Newest box as of 10/26/22", dimensions: "13.27 x 12.68 x 3.94", requiredWeight: 4.41 },
+  { name: "Box #3 - Large (Large Atlas)", description: "", dimensions: "17.50 x 12.50 x 3.00", requiredWeight: 0.00 },
+  { name: "Box #4", description: "", dimensions: "13.30 x 12.70 x 7.10", requiredWeight: 0.00 },
+  { name: "Box #4 - Large Tri-Tube", description: "", dimensions: "38.40 x 6.90 x 6.90", requiredWeight: 0.00 },
+  { name: "Box #4 - Small Tri-Tube", description: "", dimensions: "5.00 x 5.00 x 25.00", requiredWeight: 0.00 },
+  { name: "Box #5", description: "", dimensions: "13.30 x 12.70 x 13.60", requiredWeight: 0.00 },
+  { name: "Box #6", description: "", dimensions: "16.40 x 14.20 x 14.60", requiredWeight: 0.00 },
+  { name: "Box #7", description: "", dimensions: "18.90 x 15.90 x 15.40", requiredWeight: 0.00 },
+  { name: "Box #8", description: "", dimensions: "21.30 x 17.50 x 16.10", requiredWeight: 0.00 },
+  { name: "Envelope #1 (Card Envelope)", description: "", dimensions: "0.00 x 0.00 x 0.00", requiredWeight: 0.50 },
+  { name: "Express easy envelope for 1lb or less", description: "", dimensions: "13.80 x 0.00 x 10.80", requiredWeight: 1.00 },
+  { name: "Express envelope for 0.5lbs or less", description: "", dimensions: "0.00 x 0.00 x 0.00", requiredWeight: 0.50 },
+  { name: "Express Envelope with Sleeve", description: "", dimensions: "0.00 x 0.00 x 0.00", requiredWeight: 0.50 },
+  { name: "Express Legal Envelope", description: "", dimensions: "0.00 x 0.00 x 0.00", requiredWeight: 0.50 },
+  { name: "Express Legal Envelope with Sleeve", description: "", dimensions: "0.00 x 0.00 x 0.00", requiredWeight: 0.50 },
+  { name: "Large Flyer (Large Express Pack)", description: "", dimensions: "15.00 x 18.70 x 1.00", requiredWeight: 0.00 },
+  { name: "Large Padded Pouch", description: "", dimensions: "11.90 x 14.80 x 1.00", requiredWeight: 0.00 },
+  { name: "Small Padded Pouch", description: "", dimensions: "9.80 x 12.00 x 1.00", requiredWeight: 0.00 },
+  { name: "Standard Flyer (Small Express Pack)", description: "", dimensions: "11.80 x 15.70 x 1.00", requiredWeight: 0.00 },
+];
+
 function inputBorderClass(result?: boolean) {
   if (result === true) return "border-[#28a745]";
   if (result === false) return "border-[#D40511]";
@@ -359,6 +384,8 @@ export default function CRAForm({ form, onChange, fieldResults, disabled, onSave
   const [piecesAdded, setPiecesAdded] = useState(false);
   const [showAddItem, setShowAddItem] = useState(false);
   const [editItemIndex, setEditItemIndex] = useState<number | null>(null);
+  const [showPackagingModal, setShowPackagingModal] = useState(false);
+  const [packagingQuantities, setPackagingQuantities] = useState<Record<number, string>>({});
 
   const fr = fieldResults || {};
 
@@ -452,7 +479,12 @@ export default function CRAForm({ form, onChange, fieldResults, disabled, onSave
     { id: "commercialInvoice", label: "Commercial Invoice" },
   ];
 
-  const canProcess = allTabsComplete(form) && !disabled;
+  const protectionExceedsDeclared = form.shipmentInfo.protectionValue &&
+    form.shipmentInfo.protectionAmount &&
+    form.shipmentInfo.declaredValue &&
+    parseFloat(form.shipmentInfo.protectionAmount) > parseFloat(form.shipmentInfo.declaredValue);
+
+  const canProcess = allTabsComplete(form) && !disabled && !protectionExceedsDeclared;
 
   return (
     <div className="flex flex-col h-full min-h-0" style={{ fontFamily: "Arial, sans-serif", background: "#f5f5f5" }}>
@@ -635,12 +667,41 @@ export default function CRAForm({ form, onChange, fieldResults, disabled, onSave
                   />
                   <label htmlFor="protection" style={{ fontSize: "12px", color: "#555" }}>Protection Value</label>
                 </div>
+                {form.shipmentInfo.protectionValue && (
+                  <div>
+                    <CraInput
+                      label="Protection Amount"
+                      value={form.shipmentInfo.protectionAmount}
+                      onChange={(v) => updateShipmentInfo("protectionAmount", v)}
+                      disabled={disabled}
+                      type="number"
+                      placeholder="0.00"
+                      required
+                    />
+                    {form.shipmentInfo.protectionAmount && form.shipmentInfo.declaredValue && parseFloat(form.shipmentInfo.protectionAmount) > parseFloat(form.shipmentInfo.declaredValue) && (
+                      <div style={{ color: "#D40511", fontSize: "11px", marginTop: "4px", fontWeight: "bold" }}>Protection value cannot exceed declared value</div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
             {/* RIGHT COLUMN - Pieces */}
             <div className="bg-white border border-gray-200 p-3 rounded-sm">
-              <div style={{ fontSize: "13px", fontWeight: "bold", color: "#222", marginBottom: "10px" }}>Pieces</div>
+              <div className="flex items-center justify-between" style={{ marginBottom: "10px" }}>
+                <div style={{ fontSize: "13px", fontWeight: "bold", color: "#222" }}>Pieces</div>
+                <div className="flex flex-col items-center">
+                  <span style={{ fontSize: "10px", color: "#333", marginBottom: "2px" }}>Packaging</span>
+                  <button
+                    onClick={() => setShowPackagingModal(true)}
+                    className="px-2 py-1 text-sm font-bold text-white rounded-sm cursor-pointer"
+                    style={{ background: "#1a6b2a" }}
+                    disabled={disabled}
+                  >
+                    📦
+                  </button>
+                </div>
+              </div>
 
               {/* Search Type and ID */}
               <div className="grid grid-cols-2 gap-1.5 mb-3">
@@ -649,6 +710,7 @@ export default function CRAForm({ form, onChange, fieldResults, disabled, onSave
                   value={form.shipmentInfo.searchType}
                   onChange={(v) => updateShipmentInfo("searchType", v)}
                   options={[
+                    { value: "Email", label: "Email" },
                     { value: "Waybill", label: "Waybill" },
                     { value: "Reference", label: "Reference" },
                     { value: "Shipment", label: "Shipment" },
@@ -657,10 +719,11 @@ export default function CRAForm({ form, onChange, fieldResults, disabled, onSave
                   placeholder="Select a search type"
                 />
                 <CraInput
-                  label="ID"
+                  label={form.shipmentInfo.searchType ? `${form.shipmentInfo.searchType}` : "ID"}
                   value={form.shipmentInfo.pieceId}
                   onChange={(v) => updateShipmentInfo("pieceId", v)}
                   disabled={disabled}
+                  required
                 />
               </div>
 
@@ -1113,6 +1176,85 @@ export default function CRAForm({ form, onChange, fieldResults, disabled, onSave
           </button>
         </div>
       </div>
+
+      {/* Packaging Modal */}
+      {showPackagingModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.5)" }}>
+          <div className="bg-white rounded shadow-lg w-full max-w-4xl mx-4 overflow-hidden max-h-[90vh] flex flex-col">
+            <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between" style={{ background: "#fff" }}>
+              <span style={{ fontWeight: "bold", fontSize: "14px" }}>Available Packaging</span>
+              <button onClick={() => setShowPackagingModal(false)} className="text-gray-500 hover:text-gray-800 text-lg font-bold cursor-pointer" style={{ lineHeight: 1 }}>✕</button>
+            </div>
+            <div className="overflow-auto flex-1 p-4">
+              <table className="w-full border-collapse text-xs">
+                <thead>
+                  <tr style={{ background: "#FFCC00" }}>
+                    <th className="border border-gray-300 px-2 py-1 text-left font-bold">Package Name</th>
+                    <th className="border border-gray-300 px-2 py-1 text-left font-bold">Description</th>
+                    <th className="border border-gray-300 px-2 py-1 text-left font-bold">Dimensions (in)</th>
+                    <th className="border border-gray-300 px-2 py-1 text-left font-bold">Required Weight (lb)</th>
+                    <th className="border border-gray-300 px-2 py-1 text-left font-bold">Quantity</th>
+                    <th className="border border-gray-300 px-2 py-1 text-left font-bold">Unit Price (USD)</th>
+                    <th className="border border-gray-300 px-2 py-1 text-left font-bold">VAT (USD)</th>
+                    <th className="border border-gray-300 px-2 py-1 text-left font-bold">Total (USD)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {DHL_PACKAGING_OPTIONS.map((pkg, idx) => (
+                    <tr key={idx} className={idx % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                      <td className="border border-gray-300 px-2 py-1">{pkg.name}</td>
+                      <td className="border border-gray-300 px-2 py-1">{pkg.description}</td>
+                      <td className="border border-gray-300 px-2 py-1">{pkg.dimensions}</td>
+                      <td className="border border-gray-300 px-2 py-1">{pkg.requiredWeight.toFixed(2)}</td>
+                      <td className="border border-gray-300 px-2 py-1">
+                        <input
+                          type="number"
+                          min="0"
+                          className="w-14 border border-gray-300 rounded-sm px-1 py-0.5 text-xs"
+                          value={packagingQuantities[idx] || ""}
+                          onChange={(e) => setPackagingQuantities({ ...packagingQuantities, [idx]: e.target.value })}
+                        />
+                      </td>
+                      <td className="border border-gray-300 px-2 py-1">0.00</td>
+                      <td className="border border-gray-300 px-2 py-1">0.00</td>
+                      <td className="border border-gray-300 px-2 py-1">0.00</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="px-4 py-3 border-t border-gray-200 flex justify-end">
+              <button
+                onClick={() => {
+                  // Find the first packaging with quantity > 0 and auto-fill dimensions
+                  for (const [idxStr, qty] of Object.entries(packagingQuantities)) {
+                    const q = parseInt(qty);
+                    if (q > 0) {
+                      const pkg = DHL_PACKAGING_OPTIONS[parseInt(idxStr)];
+                      const dims = pkg.dimensions.split(" x ");
+                      if (dims.length === 3) {
+                        setPiecesLength(dims[0]);
+                        setPiecesWidth(dims[1]);
+                        setPiecesHeight(dims[2]);
+                      }
+                      if (pkg.requiredWeight > 0) {
+                        setPiecesWeight(pkg.requiredWeight.toString());
+                      }
+                      setPiecesQty(q.toString());
+                      break;
+                    }
+                  }
+                  setShowPackagingModal(false);
+                }}
+                className="px-4 py-1.5 text-sm font-bold text-white rounded-sm cursor-pointer"
+                style={{ background: "#28a745" }}
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Add Item Modal */}
       {showAddItem && (

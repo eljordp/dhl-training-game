@@ -34,6 +34,7 @@ function emptyForm(): ShipmentForm {
       shipmentDate: new Date().toLocaleDateString('en-US'),
       promotionCode: "",
       protectionValue: false,
+      protectionAmount: "",
       weight: "",
       length: "",
       width: "",
