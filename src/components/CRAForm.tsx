@@ -984,11 +984,11 @@ export default function CRAForm({ form, onChange, fieldResults, disabled, onSave
               <div className="grid grid-cols-3 gap-1.5 mb-2">
                 <div>
                   <label style={{ fontSize: "11px", color: "#333", display: "block", marginBottom: "2px" }}>Qty (pcs) <span style={{ color: "#D40511" }}>*</span></label>
-                  <input type="number" min="1" className="w-full border border-gray-300 rounded-sm px-1.5 py-1" style={{ fontSize: "12px" }} value={piecesQty} onChange={(e) => setPiecesQty(e.target.value)} disabled={disabled || piecesAdded} />
+                  <input type="number" min="1" className="w-full border border-gray-300 rounded-sm px-1.5 py-1" style={{ fontSize: "12px" }} value={piecesQty} onChange={(e) => { setPiecesQty(e.target.value); updateShipmentInfo("numberOfPieces", e.target.value); }} disabled={disabled || piecesAdded} />
                 </div>
                 <div>
                   <label style={{ fontSize: "11px", color: "#333", display: "block", marginBottom: "2px" }}>Weight (lb) <span style={{ color: "#D40511" }}>*</span></label>
-                  <input type="number" min="0" step="0.1" className="w-full border border-gray-300 rounded-sm px-1.5 py-1" style={{ fontSize: "12px" }} value={piecesWeight} onChange={(e) => setPiecesWeight(e.target.value)} disabled={disabled || piecesAdded} />
+                  <input type="number" min="0" step="0.1" className="w-full border border-gray-300 rounded-sm px-1.5 py-1" style={{ fontSize: "12px" }} value={piecesWeight} onChange={(e) => { setPiecesWeight(e.target.value); updateShipmentInfo("weight", e.target.value); }} disabled={disabled || piecesAdded} />
                 </div>
                 <div>
                   <label style={{ fontSize: "11px", color: "#333", display: "block", marginBottom: "2px" }}>Length (in)</label>
