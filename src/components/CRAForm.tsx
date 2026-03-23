@@ -757,12 +757,15 @@ export default function CRAForm({ form, onChange, fieldResults, disabled, onSave
                   className="w-3.5 h-3.5"
                   checked={form.shipmentInfo.accountShipment}
                   onChange={(e) => {
-                    updateShipmentInfo("accountShipment", e.target.checked);
-                    if (e.target.checked) {
-                      updateShipmentInfo("accountNumber", "");
-                    } else {
-                      updateShipmentInfo("accountNumber", "CASHUS001");
-                    }
+                    const checked = e.target.checked;
+                    onChange({
+                      ...form,
+                      shipmentInfo: {
+                        ...form.shipmentInfo,
+                        accountShipment: checked,
+                        accountNumber: checked ? "" : "CASHUS001",
+                      },
+                    });
                   }}
                   disabled={disabled}
                 />
