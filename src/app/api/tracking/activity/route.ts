@@ -46,7 +46,7 @@ export async function POST(req: Request) {
     return Response.json({ success: true });
   }
 
-  const session = verifySessionToken(sessionCookie.value);
+  const session = await verifySessionToken(sessionCookie.value);
   if (!session) {
     return Response.json({ success: true });
   }
@@ -92,7 +92,7 @@ export async function GET(req: NextRequest) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const session = verifySessionToken(sessionCookie.value);
+  const session = await verifySessionToken(sessionCookie.value);
   if (!session) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }

@@ -16,7 +16,7 @@ export async function POST(req: Request) {
     return Response.json({ success: true });
   }
 
-  const session = verifySessionToken(sessionCookie.value);
+  const session = await verifySessionToken(sessionCookie.value);
   if (!session) {
     return Response.json({ success: true });
   }

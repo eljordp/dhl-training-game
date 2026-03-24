@@ -1,29 +1,48 @@
-import { createHmac } from "crypto";
-
 const SECRET = process.env.SESSION_SECRET || "dhl-training-fallback-secret";
 
-/**
- * Simple signed cookie session.
- * Cookie value = base64(json) + "." + hmac_signature
- */
+// Web Crypto compatible HMAC (works in Edge Runtime + Node)
+async function hmacSign(payload: string): Promise<string> {
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    "raw",
+    enc.encode(SECRET),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+  const sig = await crypto.subtle.sign("HMAC", key, enc.encode(payload));
+  return btoa(String.fromCharCode(...new Uint8Array(sig)))
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+}
 
-export function createSessionToken(userId: string): string {
-  const payload = Buffer.from(JSON.stringify({ userId, ts: Date.now() })).toString("base64url");
-  const sig = createHmac("sha256", SECRET).update(payload).digest("base64url");
+function base64urlEncode(str: string): string {
+  return btoa(str).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+function base64urlDecode(str: string): string {
+  const padded = str.replace(/-/g, "+").replace(/_/g, "/");
+  return atob(padded);
+}
+
+export async function createSessionToken(userId: string): Promise<string> {
+  const payload = base64urlEncode(JSON.stringify({ userId, ts: Date.now() }));
+  const sig = await hmacSign(payload);
   return `${payload}.${sig}`;
 }
 
-export function verifySessionToken(token: string): { userId: string } | null {
+export async function verifySessionToken(token: string): Promise<{ userId: string } | null> {
   const parts = token.split(".");
   if (parts.length !== 2) return null;
 
   const [payload, sig] = parts;
-  const expectedSig = createHmac("sha256", SECRET).update(payload).digest("base64url");
+  const expectedSig = await hmacSign(payload);
 
   if (sig !== expectedSig) return null;
 
   try {
-    const data = JSON.parse(Buffer.from(payload, "base64url").toString());
+    const data = JSON.parse(base64urlDecode(payload));
     if (!data.userId) return null;
     return { userId: data.userId };
   } catch {

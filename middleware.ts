@@ -21,7 +21,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  const session = verifySessionToken(sessionCookie.value);
+  const session = await verifySessionToken(sessionCookie.value);
 
   if (!session) {
     return NextResponse.redirect(new URL("/login", request.url));

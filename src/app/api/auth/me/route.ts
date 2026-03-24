@@ -15,7 +15,7 @@ export async function GET() {
     return Response.json({ profile: null });
   }
 
-  const session = verifySessionToken(sessionCookie.value);
+  const session = await verifySessionToken(sessionCookie.value);
   if (!session) {
     return Response.json({ profile: null });
   }

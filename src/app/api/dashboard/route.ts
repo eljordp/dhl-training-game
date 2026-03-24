@@ -16,7 +16,7 @@ export async function GET() {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const session = verifySessionToken(sessionCookie.value);
+  const session = await verifySessionToken(sessionCookie.value);
   if (!session) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }

@@ -30,7 +30,7 @@ export async function POST(req: Request) {
       return Response.json({ error: "Invalid username or password" }, { status: 401 });
     }
 
-    const token = createSessionToken(profile.id);
+    const token = await createSessionToken(profile.id);
 
     const response = Response.json({
       success: true,
