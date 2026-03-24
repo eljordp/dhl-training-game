@@ -196,10 +196,10 @@ export const quizQuestions: QuizQuestion[] = [
     id: "s2",
     category: "scenarios",
     difficulty: "advanced",
-    question: "A customer gives you a phone number +52-555-1234 for a Mexico shipment. The CRA form shows +1 as the country code prefix. What do you do?",
-    options: ["Enter the full number including +52", "Remove the +52 and just enter 555-1234 since CRA adds the prefix", "Change the destination country to fix the prefix", "Tell the customer the number is wrong"],
+    question: "A customer gives you a phone number +52-55-1234-5678 for a Mexico shipment. The consignee phone field already shows the +52 country code prefix. How do you enter the number?",
+    options: ["Enter +52-55-1234-5678 (the full number including +52)", "Enter only 55-1234-5678 since the +52 prefix is already there", "Delete the +52 prefix and type the full number", "Tell the customer to give you a local number instead"],
     correct: 1,
-    explanation: "The CRA auto-adds the country code prefix based on the destination country. Enter only the local number without the country code — the system handles the prefix."
+    explanation: "The CRA auto-fills the country code prefix (+52 for Mexico) based on the destination country. Enter only the local number — typing the country code again would duplicate it."
   },
   {
     id: "s3",
@@ -254,5 +254,79 @@ export const quizQuestions: QuizQuestion[] = [
     options: ["Pieces: 1, Weight: 30 lbs", "Pieces: 3, Weight: 10 lbs", "Pieces: 3, Weight: 30 lbs", "Create 3 separate shipments"],
     correct: 2,
     explanation: "Number of Pieces = number of physical boxes (3). Weight = total combined weight of ALL pieces (3 × 10 = 30 lbs)."
+  },
+
+  // ── Advanced (additional) ──
+  {
+    id: "a1",
+    category: "customs",
+    difficulty: "advanced",
+    question: "A customer ships a laptop manufactured in China from the US to Germany. What country of origin do you enter on the Commercial Invoice?",
+    options: ["US — that's where it's shipping from", "DE — that's the destination", "CN — that's where the laptop was manufactured", "The brand's home country"],
+    correct: 2,
+    explanation: "Country of origin is ALWAYS where the product was manufactured, not where it's being shipped from or to. A Chinese-made laptop shipped from the US still has country of origin CN."
+  },
+  {
+    id: "a2",
+    category: "scenarios",
+    difficulty: "advanced",
+    question: "A customer wants to ship lithium batteries (spare, not installed in a device) to the UK. What should you do?",
+    options: ["Process it normally — batteries are standard goods", "Check DHL's dangerous goods restrictions — loose lithium batteries have shipping restrictions", "Refuse the shipment entirely", "Ship it as DOCUMENT to avoid customs"],
+    correct: 1,
+    explanation: "Loose/spare lithium batteries are classified as dangerous goods and have strict shipping restrictions. You must check DHL's prohibited and restricted items list before accepting. They may require special packaging, labeling, or may be prohibited entirely via Express."
+  },
+  {
+    id: "a3",
+    category: "customs",
+    difficulty: "advanced",
+    question: "A customer declares a package value of $2,500 USD shipping to Brazil. They ask if the receiver will pay any extra fees. What do you tell them?",
+    options: ["No — the shipping cost covers everything", "Yes — the receiver may owe import duties and taxes assessed by Brazilian customs", "Only if they chose the wrong service type", "Duties only apply above $5,000"],
+    correct: 1,
+    explanation: "Import duties and taxes are assessed by the destination country's customs authority based on declared value, HS code, and country of origin. Brazil has high import duties. The RECEIVER pays these unless the shipper selects Duties/Taxes Paid (DTP) service."
+  },
+  {
+    id: "a4",
+    category: "scenarios",
+    difficulty: "advanced",
+    question: "A customer is shipping car parts worth $3,200 to Nigeria. They hand you a commercial invoice they printed themselves. Should you use their invoice or create one in the CRA system?",
+    options: ["Use their printed invoice — it's already done", "Create one in the CRA system AND attach their printed invoice as supporting documentation", "Tell them their invoice is invalid", "Only use CRA if their invoice is missing information"],
+    correct: 1,
+    explanation: "You MUST always create the commercial invoice in the CRA system regardless of whether the customer provides their own. Their printed invoice can be attached as additional supporting documentation, but the CRA-generated invoice is what DHL and customs use."
+  },
+  {
+    id: "a5",
+    category: "customs",
+    difficulty: "advanced",
+    question: "What is the HS code for ceramic ornamental articles (vases, figurines, decorative pottery)?",
+    options: ["6204", "6913", "8471.30", "4901"],
+    correct: 1,
+    explanation: "HS code 6913 covers ceramic statuettes, ornamental articles, and decorative pottery. 6204 is women's garments, 8471.30 is laptops/computers, and 4901 is printed documents."
+  },
+  {
+    id: "a6",
+    category: "scenarios",
+    difficulty: "advanced",
+    question: "A customer wants to ship a package to a PO Box address in Dubai, UAE. What do you tell them?",
+    options: ["Process it normally with the PO Box address", "DHL Express does not deliver to PO Boxes — they need a physical street address", "Add the PO Box as Address Line 2 only", "Ship it but flag it for the destination facility"],
+    correct: 1,
+    explanation: "DHL Express requires a physical street address for delivery. PO Boxes cannot receive Express shipments. The customer must provide a physical address (home, office, or DHL Service Point) for the consignee."
+  },
+  {
+    id: "a7",
+    category: "scenarios",
+    difficulty: "advanced",
+    question: "A customer ships a $50 t-shirt to Canada as a gift. They ask 'since it's a gift, there's no duty right?' What do you tell them?",
+    options: ["Correct — gifts are always duty-free", "Not necessarily — each country has its own gift exemption threshold, and duties may still apply above that limit", "Gifts never have duties under $500", "Only commercial shipments have duties"],
+    correct: 1,
+    explanation: "Gift exemption thresholds vary by country. Canada's gift exemption is CAD $60 — above that, duties and taxes may apply. Never promise a customer that gifts are duty-free. Always advise them that customs may assess charges."
+  },
+  {
+    id: "a8",
+    category: "scenarios",
+    difficulty: "advanced",
+    question: "You're processing a shipment and the customer says the consignee's name is a company, but the 'Company Name' field is already filled and they want to put a different contact person. Where does the contact person's name go?",
+    options: ["Replace the Company Name with the person's name", "Put the person's name in the Contact Name field — Company Name and Contact Name are separate fields", "Add the person's name in the Address Line 2", "It doesn't matter — either field works"],
+    correct: 1,
+    explanation: "Company Name and Contact Name are two distinct fields. Company Name is the business entity receiving the shipment. Contact Name is the specific person at that company who should be contacted for delivery. Never combine them or put them in the wrong field."
   },
 ];
