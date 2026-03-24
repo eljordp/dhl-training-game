@@ -257,23 +257,20 @@ export default function AssessmentPage() {
               {/* Actions */}
               <div className="flex gap-3 mt-4">
                 {!isRevealed ? (
-                  <>
-                    <button
-                      onClick={() => setRevealed({ ...revealed, [current.id]: true })}
-                      className="flex-1 bg-[#FFCC00] hover:bg-[#e6b800] text-[#1a1a1a] border border-[#cca300] rounded-[3px] px-4 py-3 text-sm font-bold cursor-pointer transition"
-                    >
-                      Show Answer
-                    </button>
-                    <button
-                      onClick={() => {
-                        if (isLast) { setMode("review"); return; }
-                        setCurrentIndex(currentIndex + 1);
-                      }}
-                      className="px-4 py-3 text-sm font-bold text-gray-500 border border-gray-300 rounded-[3px] cursor-pointer hover:bg-gray-50 transition"
-                    >
-                      Skip
-                    </button>
-                  </>
+                  <button
+                    onClick={() => {
+                      if (!userAnswer.trim()) return;
+                      setRevealed({ ...revealed, [current.id]: true });
+                    }}
+                    disabled={!userAnswer.trim()}
+                    className={`flex-1 rounded-[3px] px-4 py-3 text-sm font-bold border transition ${
+                      userAnswer.trim()
+                        ? "bg-[#FFCC00] hover:bg-[#e6b800] text-[#1a1a1a] border-[#cca300] cursor-pointer"
+                        : "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed"
+                    }`}
+                  >
+                    Submit Answer
+                  </button>
                 ) : (
                   <button
                     onClick={() => {
@@ -282,7 +279,7 @@ export default function AssessmentPage() {
                     }}
                     className="flex-1 bg-[#D40511] hover:bg-[#b8040f] text-white border border-[#a3030e] rounded-[3px] px-4 py-3 text-sm font-bold cursor-pointer transition"
                   >
-                    {isLast ? "See Full Review" : "Next \u2192"}
+                    {isLast ? "Complete Assessment" : "Next \u2192"}
                   </button>
                 )}
               </div>
