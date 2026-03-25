@@ -59,6 +59,8 @@ interface EmployeeStats {
   id: string;
   username: string;
   display_name: string;
+  consent_given: boolean;
+  consent_date: string | null;
   attempts: ScenarioAttemptRow[];
   quizAttempts: QuizAttemptRow[];
   activity?: ActivityData | null;
@@ -128,6 +130,12 @@ function engagementBgColor(rate: number | null): string {
 
 function getActivityAlerts(employee: EmployeeStats): { type: "warning" | "danger"; label: string }[] {
   const alerts: { type: "warning" | "danger"; label: string }[] = [];
+
+  // Don't flag employees who haven't consented to tracking
+  if (!employee.consent_given) {
+    return alerts;
+  }
+
   const activity = employee.activity;
 
   if (!activity || activity.heartbeat_count === 0) {
@@ -494,14 +502,25 @@ function EmployeeRow({ employee }: { employee: EmployeeStats }) {
               {engRate}%
             </span>
           ) : (
-            <span className="text-[#aaa] text-xs">No data</span>
+            <span className="text-[#aaa] text-xs">{employee.consent_given ? "No data" : "No consent"}</span>
+          )}
+        </td>
+        <td className="px-4 py-3 text-sm text-center">
+          {employee.consent_given ? (
+            <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-300">
+              Yes
+            </span>
+          ) : (
+            <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-red-50 text-[#D40511] border border-red-200">
+              No
+            </span>
           )}
         </td>
         <td className="px-4 py-3 text-xs text-[#888]">{expanded ? "\u25B2 Hide" : "\u25BC View"}</td>
       </tr>
       {expanded && (
         <tr>
-          <td colSpan={10} className="px-6 py-4 bg-[#fafafa] border-b border-[#eee]">
+          <td colSpan={11} className="px-6 py-4 bg-[#fafafa] border-b border-[#eee]">
             <div className="text-xs font-bold text-[#888] uppercase mb-3 tracking-wide">
               Scenario Attempt History
             </div>
@@ -817,6 +836,7 @@ export default function ManagerDashboard() {
                       <th className="text-center px-4 py-2.5 font-bold text-xs uppercase tracking-wide">Avg Assessment</th>
                       <th className="text-left px-4 py-2.5 font-bold text-xs uppercase tracking-wide">Last Active</th>
                       <th className="text-center px-4 py-2.5 font-bold text-xs uppercase tracking-wide">Engagement</th>
+                      <th className="text-center px-4 py-2.5 font-bold text-xs uppercase tracking-wide">Consent</th>
                       <th className="px-4 py-2.5 w-20" />
                     </tr>
                   </thead>
@@ -930,7 +950,11 @@ export default function ManagerDashboard() {
                           </div>
                         </>
                       ) : (
-                        <p className="text-xs text-[#aaa]">No activity data recorded for this employee.</p>
+                        <p className="text-xs text-[#aaa]">
+                          {!emp.consent_given
+                            ? "Activity tracking declined by employee."
+                            : "No activity data recorded for this employee."}
+                        </p>
                       )}
                     </div>
                   );

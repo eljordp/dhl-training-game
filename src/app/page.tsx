@@ -1,13 +1,28 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { assessmentQuestions } from "@/data/assessment";
+import { getProfile } from "@/lib/auth";
+import ConsentBanner from "@/components/ConsentBanner";
 
 export default function Home() {
   const router = useRouter();
+  const [showConsent, setShowConsent] = useState(false);
+
+  // Show consent banner only for logged-in employees
+  useEffect(() => {
+    (async () => {
+      const profile = await getProfile();
+      if (profile && profile.role === "employee") {
+        setShowConsent(true);
+      }
+    })();
+  }, []);
 
   return (
     <div className="min-h-[100dvh] flex flex-col bg-white">
+      {showConsent && <ConsentBanner />}
       {/* DHL Header */}
       <header className="bg-[#FFCC00] px-4 md:px-6 py-2 md:py-2.5 flex items-center gap-2 md:gap-3 flex-shrink-0 border-b border-[#e6b800]">
         <div className="bg-[#D40511] rounded-[4px] px-2 md:px-3 py-0.5 flex items-center">

@@ -32,9 +32,17 @@ export async function GET() {
       return Response.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    // Get all employees
+    // Ensure consent columns exist
+    try {
+      await pool.query(`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS consent_given BOOLEAN DEFAULT false`);
+      await pool.query(`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS consent_date TIMESTAMP DEFAULT NULL`);
+    } catch {
+      // columns may already exist
+    }
+
+    // Get all employees (including consent status)
     const profilesResult = await pool.query(
-      "SELECT id, username, display_name FROM profiles WHERE role = 'employee' ORDER BY display_name"
+      "SELECT id, username, display_name, consent_given, consent_date FROM profiles WHERE role = 'employee' ORDER BY display_name"
     );
 
     // Get all scenario attempts with field results
@@ -110,6 +118,8 @@ export async function GET() {
       id: p.id,
       username: p.username,
       display_name: p.display_name,
+      consent_given: p.consent_given || false,
+      consent_date: p.consent_date ? String(p.consent_date) : null,
       attempts: attemptsResult.rows
         .filter((a) => a.user_id === p.id)
         .map((a) => ({
@@ -117,7 +127,8 @@ export async function GET() {
           field_results: fieldResultsByAttempt[a.id] || [],
         })),
       quizAttempts: quizResult.rows.filter((q) => q.user_id === p.id),
-      activity: activityByUser[p.id] || null,
+      // Only include activity data if employee has consented
+      activity: p.consent_given ? (activityByUser[p.id] || null) : null,
     }));
 
     return Response.json({ employees });

@@ -21,8 +21,16 @@ export async function GET() {
   }
 
   try {
+    // Auto-add consent columns if missing
+    try {
+      await pool.query(`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS consent_given BOOLEAN DEFAULT false`);
+      await pool.query(`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS consent_date TIMESTAMP DEFAULT NULL`);
+    } catch {
+      // columns may already exist
+    }
+
     const result = await pool.query(
-      "SELECT id, username, display_name, role, created_at FROM profiles WHERE id = $1",
+      "SELECT id, username, display_name, role, created_at, consent_given, consent_date FROM profiles WHERE id = $1",
       [session.userId]
     );
 
