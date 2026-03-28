@@ -55,7 +55,8 @@ export default function AssessmentPage() {
           questionId: a.questionId,
           category: a.tier,
           correct: a.score >= 70,
-          userAnswer: 0,
+          userAnswer: a.userAnswer,
+          score: a.score,
         })),
         selectedTier === "all" ? "all" : selectedTier || "unknown"
       );
@@ -95,7 +96,7 @@ export default function AssessmentPage() {
           <div className="w-full max-w-2xl">
             <div className="bg-white border border-[#ddd] rounded-sm shadow-sm">
               <div className="bg-[#FFCC00] px-6 py-3 border-b border-[#e6b800]">
-                <h2 className="font-bold text-[#1a1a1a] text-lg">DHL Express Advanced Assessment</h2>
+                <h2 className="font-bold text-[#1a1a1a] text-lg">DHL Express Quiz</h2>
                 <p className="text-xs text-[#555] mt-0.5">37 Questions | 4 Tiers | Built for Real Operators</p>
               </div>
               <div className="px-6 py-6 space-y-3">
@@ -122,10 +123,10 @@ export default function AssessmentPage() {
                   className="w-full text-left px-5 py-4 rounded-[3px] border-2 border-[#D40511] bg-red-50 hover:shadow-md transition cursor-pointer"
                 >
                   <div className="flex items-center justify-between mb-1">
-                    <span className="font-bold text-base text-[#D40511]">Full Assessment — All Tiers</span>
+                    <span className="font-bold text-base text-[#D40511]">Full Quiz — All Tiers</span>
                     <span className="text-xs text-gray-500 font-medium">{assessmentQuestions.length} questions</span>
                   </div>
-                  <p className="text-sm text-gray-600">Complete evaluation across all tiers. For serious operators only.</p>
+                  <p className="text-sm text-gray-600">Every question across all tiers.</p>
                 </button>
               </div>
 
@@ -159,7 +160,7 @@ export default function AssessmentPage() {
             {/* Scored Summary */}
             <div className="bg-white border border-[#ddd] rounded-sm shadow-sm mb-4">
               <div className="bg-[#FFCC00] px-6 py-3 border-b border-[#e6b800]">
-                <h2 className="font-bold text-[#1a1a1a] text-lg">Assessment Results</h2>
+                <h2 className="font-bold text-[#1a1a1a] text-lg">Quiz Results</h2>
               </div>
               <div className="px-6 py-5">
                 {/* Overall score + pass/fail */}
@@ -295,7 +296,7 @@ export default function AssessmentPage() {
                 onClick={() => { setMode("select"); setSelectedTier(null); setCurrentIndex(0); setAnswers({}); setRevealed({}); setQuestionGrades({}); setGradeResult(null); savedRef.current = false; }}
                 className="flex-1 bg-[#FFCC00] hover:bg-[#e6b800] text-[#1a1a1a] border border-[#cca300] rounded-[3px] px-4 py-3 text-sm font-bold cursor-pointer transition"
               >
-                TAKE ANOTHER TIER
+                TRY ANOTHER TIER
               </button>
               <button
                 onClick={() => router.push("/")}
@@ -455,7 +456,7 @@ export default function AssessmentPage() {
                     }}
                     className="flex-1 bg-[#D40511] hover:bg-[#b8040f] text-white border border-[#a3030e] rounded-[3px] px-4 py-3 text-sm font-bold cursor-pointer transition"
                   >
-                    {isLast ? "Complete Assessment \u2713" : "Next \u2192"}
+                    {isLast ? "Complete Quiz \u2713" : "Next \u2192"}
                   </button>
                 )}
               </div>

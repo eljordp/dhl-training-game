@@ -21,7 +21,7 @@ export async function saveQuizAttempt(
   totalQuestions: number,
   correctAnswers: number,
   timeSpent: number,
-  questionResults: { questionId: string; category: string; correct: boolean; userAnswer: number }[],
+  questionResults: { questionId: string; category: string; correct: boolean; userAnswer: string | number; score?: number }[],
   difficulty: string
 ): Promise<void> {
   try {
