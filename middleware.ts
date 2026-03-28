@@ -8,7 +8,7 @@ export async function middleware(request: NextRequest) {
   }
 
   const { pathname } = request.nextUrl;
-  const protectedPaths = ["/game", "/quiz", "/results", "/dashboard"];
+  const protectedPaths = ["/game", "/quiz", "/mc-quiz", "/results", "/dashboard"];
   const isProtected = protectedPaths.some((p) => pathname.startsWith(p));
 
   if (!isProtected) {
@@ -34,6 +34,7 @@ export const config = {
   matcher: [
     "/game/:path*",
     "/quiz/:path*",
+    "/mc-quiz/:path*",
     "/results/:path*",
     "/dashboard/:path*",
   ],

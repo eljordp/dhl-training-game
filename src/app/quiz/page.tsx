@@ -4,7 +4,7 @@ import { useState, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import DHLHeader from "@/components/DHLHeader";
 import { assessmentQuestions, TIER_CONFIG, AssessmentTier } from "@/data/assessment";
-import { gradeAssessment, AssessmentGradeResult } from "@/lib/gradeAssessment";
+import { gradeAssessment, gradeQuestion, AssessmentGradeResult, GradedAnswer } from "@/lib/gradeAssessment";
 import { saveQuizAttempt } from "@/lib/tracking";
 import { useActivityTracker } from "@/lib/useActivityTracker";
 
@@ -17,6 +17,7 @@ export default function AssessmentPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [revealed, setRevealed] = useState<Record<string, boolean>>({});
+  const [questionGrades, setQuestionGrades] = useState<Record<string, GradedAnswer>>({});
   const [startTime] = useState(Date.now());
   const [gradeResult, setGradeResult] = useState<AssessmentGradeResult | null>(null);
   const savedRef = useRef(false);
@@ -291,7 +292,7 @@ export default function AssessmentPage() {
             {/* Actions */}
             <div className="flex flex-col sm:flex-row gap-3 mt-4">
               <button
-                onClick={() => { setMode("select"); setSelectedTier(null); setCurrentIndex(0); setAnswers({}); setRevealed({}); setGradeResult(null); savedRef.current = false; }}
+                onClick={() => { setMode("select"); setSelectedTier(null); setCurrentIndex(0); setAnswers({}); setRevealed({}); setQuestionGrades({}); setGradeResult(null); savedRef.current = false; }}
                 className="flex-1 bg-[#FFCC00] hover:bg-[#e6b800] text-[#1a1a1a] border border-[#cca300] rounded-[3px] px-4 py-3 text-sm font-bold cursor-pointer transition"
               >
                 TAKE ANOTHER TIER
@@ -356,25 +357,69 @@ export default function AssessmentPage() {
                 disabled={isRevealed}
               />
 
-              {/* Answer key (revealed) */}
-              {isRevealed && (
-                <div className="mt-4 bg-green-50 border border-green-200 rounded-[3px] px-4 py-3">
-                  <div className="text-xs font-bold text-green-700 uppercase tracking-wide mb-2">Answer Key</div>
-                  <ul className="space-y-1.5">
-                    {current.answerKey.map((point, i) => (
-                      <li key={i} className="text-sm text-green-900 flex gap-2">
-                        <span className="text-green-600 flex-shrink-0">&bull;</span>
-                        <span>{point}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  {current.warningNote && (
-                    <div className="mt-2 pt-2 border-t border-green-200 text-xs text-amber-700 font-medium">
-                      {current.warningNote}
+              {/* Answer key + instant grade (revealed) */}
+              {isRevealed && (() => {
+                const qg = questionGrades[current.id];
+                const qPassed = qg && qg.score >= 70;
+                return (
+                  <>
+                    {/* Grade badge */}
+                    {qg && (
+                      <div className={`mt-4 flex items-center gap-3 px-4 py-2.5 rounded-[3px] border-2 ${qPassed ? "bg-green-50 border-green-400" : "bg-red-50 border-[#D40511]"}`}>
+                        <span className={`text-2xl font-bold ${qPassed ? "text-green-700" : "text-[#D40511]"}`}>{qg.score}%</span>
+                        <div>
+                          <span className={`text-sm font-bold ${qPassed ? "text-green-800" : "text-[#D40511]"}`}>
+                            {qPassed ? "PASS" : "NEEDS REVIEW"}
+                          </span>
+                          <span className="text-xs text-gray-500 ml-2">
+                            {qg.matchedPoints}/{qg.totalPoints} key points matched
+                          </span>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Answer key with per-bullet checkmarks */}
+                    <div className="mt-3 bg-green-50 border border-green-200 rounded-[3px] px-4 py-3">
+                      <div className="text-xs font-bold text-green-700 uppercase tracking-wide mb-2">Answer Key</div>
+                      <ul className="space-y-1.5">
+                        {current.answerKey.map((point, i) => {
+                          const wasMissed = qg?.feedback.includes(point);
+                          return (
+                            <li key={i} className={`text-sm flex gap-2 ${wasMissed ? "text-orange-700" : "text-green-900"}`}>
+                              <span className={`flex-shrink-0 ${wasMissed ? "text-orange-500" : "text-green-600"}`}>
+                                {wasMissed ? "\u2717" : "\u2713"}
+                              </span>
+                              <span>{point}</span>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                      {current.warningNote && (
+                        <div className="mt-2 pt-2 border-t border-green-200 text-xs text-amber-700 font-medium">
+                          {current.warningNote}
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-              )}
+
+                    {/* Missed points callout */}
+                    {qg && qg.feedback.length > 0 && (
+                      <div className="mt-2 bg-orange-50 border border-orange-200 rounded-[3px] px-3 py-2">
+                        <div className="text-xs font-bold text-orange-700 uppercase tracking-wide mb-1">
+                          Missed Points ({qg.feedback.length})
+                        </div>
+                        <ul className="space-y-0.5">
+                          {qg.feedback.map((point, i) => (
+                            <li key={i} className="text-xs text-orange-800 flex gap-1.5">
+                              <span className="text-orange-500 flex-shrink-0">&bull;</span>
+                              <span>{point}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
 
               {/* Actions */}
               <div className="flex gap-3 mt-4" id="quiz-actions">
@@ -383,6 +428,9 @@ export default function AssessmentPage() {
                     onClick={() => {
                       if (!userAnswer.trim()) return;
                       setRevealed({ ...revealed, [current.id]: true });
+                      // Grade the question instantly
+                      const qGrade = gradeQuestion(current, userAnswer);
+                      setQuestionGrades({ ...questionGrades, [current.id]: qGrade });
                       // Scroll to make the next/complete button visible after answer key reveals
                       setTimeout(() => {
                         document.getElementById("quiz-actions")?.scrollIntoView({ behavior: "smooth", block: "center" });

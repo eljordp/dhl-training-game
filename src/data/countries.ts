@@ -167,8 +167,6 @@ export const COUNTRIES: Country[] = [
   { code: "ZW", name: "Zimbabwe" },
   // Additional countries from real shipment data
   { code: "BZ", name: "Belize" },
-  { code: "MK", name: "North Macedonia" },
-  { code: "NI", name: "Nicaragua" },
 ];
 
 // Helper: get country name from code

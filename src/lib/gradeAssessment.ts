@@ -18,6 +18,116 @@ export interface AssessmentGradeResult {
   gradedAnswers: GradedAnswer[];
 }
 
+/**
+ * Simple stemmer: strip common suffixes to get a rough root form.
+ * Not a full NLP stemmer — just enough to match "regulation" → "regulat",
+ * "professionally" → "profession", etc.
+ */
+function simpleStem(word: string): string {
+  let w = word.toLowerCase();
+  // Order matters — strip longer suffixes first
+  const suffixes = [
+    "ation", "ition", "ment", "ness", "tion", "sion",
+    "ible", "able", "ious", "eous", "ous", "ive",
+    "ing", "ful", "less", "ally", "ily", "ly",
+    "ed", "er", "es", "al",
+  ];
+  for (const suffix of suffixes) {
+    if (w.length > suffix.length + 2 && w.endsWith(suffix)) {
+      return w.slice(0, -suffix.length);
+    }
+  }
+  return w;
+}
+
+/**
+ * Synonym / related-term map.
+ * Each key maps to a set of words that should be treated as equivalent matches.
+ * The map is bidirectional — built from synonym groups below.
+ */
+const SYNONYM_GROUPS: string[][] = [
+  ["fraud", "fraudulent", "fraud flag"],
+  ["hold", "held", "holding"],
+  ["seize", "seized", "seizure"],
+  ["reject", "rejected", "rejection"],
+  ["fine", "fines", "penalty", "penalties"],
+  ["compliant", "compliance", "non-compliant"],
+  ["regulate", "regulated", "regulations", "regulatory"],
+  ["restrict", "restricted", "restrictions"],
+  ["prohibit", "prohibited"],
+  ["declare", "declared", "declaration", "declarations"],
+  ["inspect", "inspection"],
+  ["verify", "verified", "verification"],
+  ["describe", "described", "description", "descriptions"],
+  ["invoice", "invoicing"],
+  ["deliver", "delivery", "delivered"],
+  ["clear", "clearance", "cleared", "clearing"],
+  ["ship", "shipped", "shipping", "shipment", "shipments"],
+  ["custom", "customs"],
+  ["duty", "duties"],
+  ["tax", "taxes", "taxed"],
+  ["charge", "charges", "charged"],
+  ["require", "required", "requirement", "requirements"],
+  ["identify", "identified", "identification"],
+  ["value", "valued", "valuation", "undervalue", "undervalued", "undervaluation"],
+  ["specific", "specifically"],
+  ["detail", "detailed"],
+  ["resolve", "resolved"],
+  ["suspect", "suspected", "suspicious", "suspicion"],
+  ["match", "mismatch", "mismatched", "matching"],
+  ["criminal", "prosecution"],
+  ["precedent", "exception", "exceptions"],
+];
+
+// Build a flat map: word → array of all synonyms (including itself)
+const SYNONYM_MAP = new Map<string, string[]>();
+for (const group of SYNONYM_GROUPS) {
+  for (const word of group) {
+    if (SYNONYM_MAP.has(word)) {
+      // Merge with existing array
+      const existing = SYNONYM_MAP.get(word)!;
+      for (let i = 0; i < group.length; i++) {
+        if (existing.indexOf(group[i]) === -1) {
+          existing.push(group[i]);
+        }
+      }
+    } else {
+      SYNONYM_MAP.set(word, group.slice());
+    }
+  }
+}
+
+/**
+ * Check if a term (from the answer key) appears in the user's answer text.
+ * Checks: exact substring, synonym substring, and stem-based matching.
+ */
+function termExistsInAnswer(term: string, userAnswerLower: string, userAnswerWords: string[]): boolean {
+  // 1. Direct substring match (original behavior)
+  if (userAnswerLower.includes(term)) {
+    return true;
+  }
+
+  // 2. Synonym match — check if any synonym of this term appears in the answer
+  const synonyms = SYNONYM_MAP.get(term);
+  if (synonyms) {
+    for (const syn of synonyms) {
+      if (userAnswerLower.includes(syn)) {
+        return true;
+      }
+    }
+  }
+
+  // 3. Stem-based match — compare stems of the key term against stems of user words
+  const termStem = simpleStem(term);
+  for (const userWord of userAnswerWords) {
+    if (simpleStem(userWord) === termStem) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 const STOP_WORDS = new Set([
   "the", "a", "an", "is", "are", "was", "were", "be", "been", "being",
   "for", "to", "of", "in", "on", "it", "and", "or", "but", "not",
@@ -49,26 +159,33 @@ function extractKeyTerms(bullet: string): string[] {
 
 /**
  * Check if a user's answer matches a bullet point from the answer key.
- * A bullet is "matched" if >= 60% of its key terms appear in the user answer.
+ * A bullet is "matched" if >= 40% of its key terms appear in the user answer.
+ * Uses synonym matching and simple stemming for more forgiving comparisons.
  */
 function bulletMatches(bullet: string, userAnswerLower: string): boolean {
   const keyTerms = extractKeyTerms(bullet);
   if (keyTerms.length === 0) return true; // trivial bullet
 
+  // Pre-split user answer into words for stem comparison
+  const userAnswerWords = userAnswerLower
+    .replace(/[^a-z0-9\s/-]/g, " ")
+    .split(/\s+/)
+    .filter((w) => w.length > 1);
+
   let matched = 0;
   for (const term of keyTerms) {
-    if (userAnswerLower.includes(term)) {
+    if (termExistsInAnswer(term, userAnswerLower, userAnswerWords)) {
       matched++;
     }
   }
 
-  return matched / keyTerms.length >= 0.6;
+  return matched / keyTerms.length >= 0.4;
 }
 
 /**
  * Grade a single question.
  */
-function gradeQuestion(
+export function gradeQuestion(
   question: AssessmentQuestion,
   userAnswer: string
 ): GradedAnswer {

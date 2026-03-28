@@ -169,9 +169,9 @@ export const assessmentQuestions: AssessmentQuestion[] = [
     tierNumber: 2,
     question: "Customer intentionally undervalues goods — what are your responsibilities?",
     answerKey: [
-      "Warn the customer about consequences (seizure, fines)",
+      "Warn the customer about consequences — undervaluation can lead to seizure, fines, or shipment destruction",
       "Refuse to process if clearly fraudulent",
-      "You have legal liability — DHL compliance requires accurate declarations",
+      "Declaring inaccurate value is fraud and illegal — DHL compliance requires accurate declared value on all shipments",
     ],
   },
   {
@@ -191,10 +191,10 @@ export const assessmentQuestions: AssessmentQuestion[] = [
     tierNumber: 2,
     question: "What causes a shipment to be flagged by customs inspection automatically?",
     answerKey: [
-      "Low declared value relative to item type",
+      "Undervalued or suspicious declared value relative to item type",
       "Vague descriptions ('gift', 'sample', 'stuff')",
-      "Data mismatches between AWB and invoice",
-      "High-risk country routes",
+      "Data mismatch or discrepancy between AWB (air waybill) and invoice — inconsistent information",
+      "High-risk origin countries or restricted country routes",
     ],
   },
   {
@@ -214,10 +214,10 @@ export const assessmentQuestions: AssessmentQuestion[] = [
     tierNumber: 2,
     question: "When is a shipment considered dangerous goods even if the customer says it's not?",
     answerKey: [
-      "Perfume/cologne (flammable — contains alcohol)",
+      "Perfumes and cologne are flammable because they contain alcohol — classified as dangerous goods",
       "Lithium batteries (loose or in devices)",
       "Aerosol sprays, nail polish, certain liquids",
-      "Must identify DG even if customer doesn't know or disclose",
+      "Employee must check and identify dangerous goods regardless of what customer says or knows",
     ],
   },
   {
@@ -252,9 +252,9 @@ export const assessmentQuestions: AssessmentQuestion[] = [
     tierNumber: 3,
     question: "AWB shows $50 declared value, but the invoice shows $500 — what happens?",
     answerKey: [
-      "Triggers customs hold due to data mismatch",
-      "Considered suspicious — potential fraud flag",
-      "Shipment will not clear until discrepancy is resolved",
+      "Shipment gets flagged and held at customs due to value mismatch and data discrepancy",
+      "Considered suspicious undervaluation — potential fraud flag",
+      "Shipment is held and customs won't clear it until the mismatch is resolved",
     ],
   },
   {
@@ -371,7 +371,7 @@ export const assessmentQuestions: AssessmentQuestion[] = [
     question: "Customer says: 'Just put $20, it's actually $200 but I don't want taxes.' How do you respond?",
     answerKey: [
       "\"I understand, but we're required to declare the actual value. If we undervalue it, customs can seize the shipment or fine both you and the carrier.\"",
-      "Stand firm — educate without confrontation",
+      "Refuse the request, explain the consequences professionally — undervaluation leads to seizure, fines, and legal liability",
     ],
     warningNote: "Never undervalue at customer's request — personal liability",
   },
@@ -381,8 +381,8 @@ export const assessmentQuestions: AssessmentQuestion[] = [
     tierNumber: 4,
     question: "Customer says: 'It's just stuff.' How do you get a proper description?",
     answerKey: [
-      "\"I'll need a more detailed description — for example, 'men's cotton shirts' or 'plastic phone cases.' This helps avoid customs delays.\"",
-      "Force clarity — prevent customs holds",
+      "Ask for specific description — what type of item, what material, what it's used for",
+      "Vague descriptions cause customs delays and holds — need clear, detailed content descriptions",
     ],
   },
   {
@@ -391,8 +391,8 @@ export const assessmentQuestions: AssessmentQuestion[] = [
     tierNumber: 4,
     question: "Customer says: 'It's just a gift' — but there's perfume inside. What do you do?",
     answerKey: [
-      "\"Perfumes contain alcohol and are regulated as dangerous goods. Let me check if we can ship it safely under DHL guidelines.\"",
-      "Catch dangerous goods early — don't rely on customer's description",
+      "Perfume contains alcohol, classified as flammable dangerous goods — must check DHL dangerous goods restrictions before shipping",
+      "Employee must identify dangerous goods, don't rely on customer classification or description",
     ],
   },
   {
@@ -402,7 +402,7 @@ export const assessmentQuestions: AssessmentQuestion[] = [
     question: "Customer doesn't want to give receiver's phone number. What do you say?",
     answerKey: [
       "\"I just need a phone number for the receiver — without it, delivery or customs clearance may fail.\"",
-      "Reinforce that this is a critical field, not optional",
+      "Phone number is required, not optional — delivery and customs clearance depend on it",
     ],
   },
   {
@@ -412,7 +412,7 @@ export const assessmentQuestions: AssessmentQuestion[] = [
     question: "Customer is shipping to Brazil. What do you need to ask for specifically?",
     answerKey: [
       "\"For Brazil, I'll need the receiver's tax ID — CPF for individuals, CNPJ for companies. Without it, the shipment will not clear customs.\"",
-      "Country-specific expertise — Brazil rejects without tax ID",
+      "Brazil customs rejects shipments without valid tax identification number (CPF or CNPJ)",
     ],
   },
   {
@@ -421,7 +421,7 @@ export const assessmentQuestions: AssessmentQuestion[] = [
     tierNumber: 4,
     question: "Customer calls angry: 'Why is my package stuck?!' How do you handle it?",
     answerKey: [
-      "\"Let me check — usually delays happen due to customs needing more information. I'll verify the invoice, value, and contact details so we can resolve it quickly.\"",
+      "Check the invoice, declared value, receiver contact details, and customs status to find the issue",
       "Stay calm, take control, check the data before escalating",
     ],
   },
@@ -431,8 +431,8 @@ export const assessmentQuestions: AssessmentQuestion[] = [
     tierNumber: 4,
     question: "Customer insists: 'It always worked before' but shipment is non-compliant. What do you say?",
     answerKey: [
-      "\"Regulations change and enforcement varies — we have to follow current DHL and customs compliance to avoid delays or penalties.\"",
-      "Stand firm professionally — past exceptions don't set precedent",
+      "Regulations change, enforcement varies — must follow current DHL and customs compliance rules",
+      "Past shipments clearing doesn't mean they were compliant — previous exceptions don't set precedent",
     ],
   },
 ];
