@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getProfile } from "@/lib/auth";
 import DHLHeader from "@/components/DHLHeader";
-import { TIER_CONFIG } from "@/data/assessment";
+import { TIER_CONFIG, assessmentQuestions } from "@/data/assessment";
 
 // --- Types ---
 
@@ -33,6 +33,8 @@ interface QuestionResult {
   questionId: string;
   category: string;
   correct: boolean;
+  userAnswer?: string;
+  score?: number;
 }
 
 interface QuizAttemptRow {
@@ -406,33 +408,56 @@ function QuizAttemptCard({ attempt }: { attempt: QuizAttemptRow }) {
         <span className="text-[#888] text-xs ml-2">{expanded ? "\u25B2" : "\u25BC"}</span>
       </button>
       {expanded && attempt.question_results && attempt.question_results.length > 0 && (
-        <div className="px-4 pb-3">
-          <div className="mt-2 border border-[#ddd] rounded-[2px] overflow-hidden">
-            <table className="w-full text-xs">
-              <thead>
-                <tr className="bg-[#f2f2f2] text-[#555]">
-                  <th className="text-left px-3 py-1.5 font-semibold">Question</th>
-                  <th className="text-left px-3 py-1.5 font-semibold">Category</th>
-                  <th className="text-left px-3 py-1.5 font-semibold w-16">Result</th>
-                </tr>
-              </thead>
-              <tbody>
-                {attempt.question_results.map((qr, i) => (
-                  <tr key={i} className={i % 2 === 0 ? "bg-white" : "bg-[#fafafa]"}>
-                    <td className="px-3 py-1.5 text-[#333] font-medium">{qr.questionId}</td>
-                    <td className="px-3 py-1.5 text-[#555]">{qr.category.replace(/_/g, " ")}</td>
-                    <td className="px-3 py-1.5">
-                      {qr.correct ? (
-                        <span className="text-green-600 font-bold">Pass</span>
-                      ) : (
-                        <span className="text-[#D40511] font-bold">Miss</span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+        <div className="px-4 pb-3 space-y-2 mt-2">
+          {attempt.question_results.map((qr, i) => {
+            const questionData = assessmentQuestions.find((q) => q.id === qr.questionId);
+            const qScore = qr.score ?? (qr.correct ? 100 : 0);
+            const qPassed = qr.correct;
+            return (
+              <div key={i} className="border border-[#e0e0e0] rounded-[2px] overflow-hidden">
+                <div className="flex items-center justify-between px-3 py-2 bg-[#f8f8f8]">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-[#888] font-medium">Q{i + 1}</span>
+                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${qPassed ? "bg-green-100 text-green-700" : "bg-red-100 text-[#D40511]"}`}>
+                      {qScore}% {qPassed ? "PASS" : "MISS"}
+                    </span>
+                  </div>
+                  <span className="text-xs text-[#888]">{qr.category.replace(/_/g, " ")}</span>
+                </div>
+                <div className="px-3 py-2">
+                  <p className="text-xs font-semibold text-[#1a1a1a] mb-2">
+                    {questionData?.question || qr.questionId}
+                  </p>
+                  <div className="mb-2">
+                    <div className="text-[10px] font-bold text-[#888] uppercase tracking-wide mb-0.5">Their Answer</div>
+                    <div className={`text-xs px-2.5 py-1.5 rounded-[2px] border ${qr.userAnswer ? "bg-blue-50 border-blue-200 text-blue-900" : "bg-gray-50 border-gray-200 text-gray-400 italic"}`}>
+                      {qr.userAnswer || "No answer provided"}
+                    </div>
+                  </div>
+                  {questionData && (
+                    <div>
+                      <div className="text-[10px] font-bold text-green-700 uppercase tracking-wide mb-0.5">Answer Key</div>
+                      <div className="bg-green-50 border border-green-200 rounded-[2px] px-2.5 py-1.5">
+                        <ul className="space-y-0.5">
+                          {questionData.answerKey.map((point, j) => (
+                            <li key={j} className="text-xs text-green-900 flex gap-1.5">
+                              <span className="text-green-600 flex-shrink-0">{"\u2713"}</span>
+                              <span>{point}</span>
+                            </li>
+                          ))}
+                        </ul>
+                        {questionData.warningNote && (
+                          <div className="mt-1.5 pt-1.5 border-t border-green-200 text-[10px] text-amber-700 font-medium">
+                            {questionData.warningNote}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

@@ -12,7 +12,7 @@ export function getPool(): Pool | null {
       max: 10,
       idleTimeoutMillis: 30000,
       connectionTimeoutMillis: 5000,
-      ssl: false,
+      ssl: url.includes("supabase") || url.includes("neon") ? { rejectUnauthorized: false } : false,
     });
   }
 
