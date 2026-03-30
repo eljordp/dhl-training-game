@@ -211,6 +211,97 @@ export default function AssessmentPage() {
               </div>
             </div>
 
+            {/* Personalized Training Focus */}
+            {(() => {
+              const failedQuestions = grade.gradedAnswers.filter((a) => a.score < 70);
+              if (failedQuestions.length === 0) return null;
+
+              // Group failed questions by topic area
+              const topicMap: Record<string, { count: number; questions: string[]; tips: string[] }> = {};
+              for (const fq of failedQuestions) {
+                const q = questions.find((qq) => qq.id === fq.questionId);
+                if (!q) continue;
+
+                // Determine topic from question content
+                const qText = q.question.toLowerCase();
+                let topic = "General Knowledge";
+                let tip = "";
+
+                if (qText.includes("doc") && qText.includes("non-doc") || qText.includes("service type") || qText.includes("wpx") || qText.includes("dox")) {
+                  topic = "Shipment Classification";
+                  tip = "Know the difference between DOC (documents, no value) and NON-DOC (goods with value). Know when to use WPX, DOX, EXP, ECX.";
+                } else if (qText.includes("customs") || qText.includes("hs code") || qText.includes("harmonized") || qText.includes("country of origin")) {
+                  topic = "Customs & Compliance";
+                  tip = "Every international shipment needs customs docs. Country of origin = where the product was MADE, not where it ships from.";
+                } else if (qText.includes("value") || qText.includes("declared") || qText.includes("undervalue") || qText.includes("$")) {
+                  topic = "Declared Value & Pricing";
+                  tip = "Never enter $0 for physical goods. Always declare the fair market value. Undervaluing is fraud — customs can seize the shipment.";
+                } else if (qText.includes("phone") || qText.includes("address") || qText.includes("po box") || qText.includes("contact")) {
+                  topic = "Contact Info & Addresses";
+                  tip = "Phone number is required — without it, delivery fails. DHL Express doesn't deliver to PO Boxes. Always get a physical street address.";
+                } else if (qText.includes("dangerous") || qText.includes("lithium") || qText.includes("perfume") || qText.includes("battery")) {
+                  topic = "Dangerous Goods";
+                  tip = "Perfume, loose lithium batteries, and aerosols are dangerous goods. Always check — don't rely on what the customer tells you.";
+                } else if (qText.includes("invoice") || qText.includes("commercial") || qText.includes("multi-piece") || qText.includes("item")) {
+                  topic = "Commercial Invoice";
+                  tip = "Different product types need separate line items with their own HS codes. Always create the invoice in CRA — even if the customer brings their own.";
+                } else if (qText.includes("weight") || qText.includes("dimensional") || qText.includes("volumetric")) {
+                  topic = "Weight & Dimensions";
+                  tip = "DHL charges the higher of actual weight vs dimensional weight. Formula: (L × W × H in cm) ÷ 5000.";
+                } else if (qText.includes("duties") || qText.includes("taxes") || qText.includes("gift") || qText.includes("brazil") || qText.includes("saudi")) {
+                  topic = "Duties, Taxes & Country Rules";
+                  tip = "Each country has its own rules. Brazil needs CPF/CNPJ tax ID. Gift exemptions vary by country. Receiver may owe duties at delivery.";
+                } else if (qText.includes("customer") || qText.includes("respond") || qText.includes("angry") || qText.includes("insist") || qText.includes("says")) {
+                  topic = "Customer Handling";
+                  tip = "Stay professional but firm. Never undervalue at a customer's request. When a shipment is stuck, check invoice, value, and contact details before escalating.";
+                }
+
+                if (!topicMap[topic]) {
+                  topicMap[topic] = { count: 0, questions: [], tips: [] };
+                }
+                topicMap[topic].count++;
+                topicMap[topic].questions.push(q.question);
+                if (tip && !topicMap[topic].tips.includes(tip)) {
+                  topicMap[topic].tips.push(tip);
+                }
+              }
+
+              // Sort by most missed
+              const sortedTopics = Object.entries(topicMap).sort((a, b) => b[1].count - a[1].count);
+
+              return (
+                <div className="bg-white border-2 border-[#D40511] rounded-sm shadow-sm mb-4">
+                  <div className="bg-[#D40511] px-6 py-3">
+                    <h2 className="font-bold text-white text-lg">Your Training Focus</h2>
+                    <p className="text-red-100 text-xs mt-0.5">Based on your answers, here{"'"}s what to work on</p>
+                  </div>
+                  <div className="px-6 py-5 space-y-4">
+                    {sortedTopics.map(([topic, data]) => (
+                      <div key={topic} className="border border-gray-200 rounded-[3px] overflow-hidden">
+                        <div className="bg-red-50 px-4 py-2.5 flex items-center justify-between">
+                          <span className="text-sm font-bold text-[#D40511]">{topic}</span>
+                          <span className="text-xs bg-[#D40511] text-white px-2 py-0.5 rounded-full font-bold">
+                            {data.count} missed
+                          </span>
+                        </div>
+                        {data.tips.map((tip, i) => (
+                          <div key={i} className="px-4 py-3 border-t border-gray-100">
+                            <p className="text-sm text-[#1a1a1a]">{tip}</p>
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+
+                    <div className="bg-[#FFF8E0] border border-[#FFCC00] rounded-[3px] px-4 py-3 mt-2">
+                      <p className="text-sm text-[#1a1a1a] font-medium">
+                        Review the questions you missed below — pay attention to the answer key and missed points for each one.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+
             {/* All questions with answers + grading */}
             {questions.map((q, idx) => {
               const cfg = TIER_CONFIG[q.tier];
