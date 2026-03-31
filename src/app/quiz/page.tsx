@@ -18,9 +18,19 @@ export default function AssessmentPage() {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [revealed, setRevealed] = useState<Record<string, boolean>>({});
   const [questionGrades, setQuestionGrades] = useState<Record<string, GradedAnswer>>({});
+  const [acknowledged, setAcknowledged] = useState<Record<string, boolean>>({});
   const [startTime] = useState(Date.now());
   const [gradeResult, setGradeResult] = useState<AssessmentGradeResult | null>(null);
   const savedRef = useRef(false);
+
+  function speakText(text: string) {
+    if (typeof window === "undefined" || !window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const utt = new SpeechSynthesisUtterance(text);
+    utt.rate = 0.95;
+    utt.lang = "en-US";
+    window.speechSynthesis.speak(utt);
+  }
 
   // Activity tracking — "quiz" during assessment, "quiz-review" during review
   useActivityTracker(mode === "review" ? "quiz-review" : "quiz");
@@ -337,7 +347,17 @@ export default function AssessmentPage() {
 
                     {/* Answer key */}
                     <div>
-                      <div className="text-xs font-bold text-green-700 uppercase tracking-wide mb-1">Answer Key</div>
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="text-xs font-bold text-green-700 uppercase tracking-wide">Answer Key</div>
+                        <button
+                          onClick={() => speakText(q.answerKey.join(". "))}
+                          title="Read answer key aloud"
+                          className="flex items-center gap-1 text-xs text-green-700 hover:text-green-900 bg-green-100 hover:bg-green-200 border border-green-300 rounded px-2 py-0.5 cursor-pointer transition"
+                        >
+                          <span>🔊</span>
+                          <span>Listen</span>
+                        </button>
+                      </div>
                       <div className="bg-green-50 border border-green-200 rounded-[3px] px-3 py-2">
                         <ul className="space-y-1">
                           {q.answerKey.map((point, i) => {
@@ -472,7 +492,17 @@ export default function AssessmentPage() {
 
                     {/* Answer key with per-bullet checkmarks */}
                     <div className="mt-3 bg-green-50 border border-green-200 rounded-[3px] px-4 py-3">
-                      <div className="text-xs font-bold text-green-700 uppercase tracking-wide mb-2">Answer Key</div>
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="text-xs font-bold text-green-700 uppercase tracking-wide">Answer Key</div>
+                        <button
+                          onClick={() => speakText(current.answerKey.join(". "))}
+                          title="Read answer key aloud"
+                          className="flex items-center gap-1 text-xs text-green-700 hover:text-green-900 bg-green-100 hover:bg-green-200 border border-green-300 rounded px-2 py-0.5 cursor-pointer transition"
+                        >
+                          <span>🔊</span>
+                          <span>Listen</span>
+                        </button>
+                      </div>
                       <ul className="space-y-1.5">
                         {current.answerKey.map((point, i) => {
                           const wasMissed = qg?.feedback.includes(point);
@@ -513,8 +543,23 @@ export default function AssessmentPage() {
                 );
               })()}
 
+              {/* Acknowledgment checkbox (shown after answer is revealed) */}
+              {isRevealed && (
+                <label className="flex items-start gap-3 mt-4 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={acknowledged[current.id] || false}
+                    onChange={(e) => setAcknowledged({ ...acknowledged, [current.id]: e.target.checked })}
+                    className="mt-0.5 w-4 h-4 accent-[#D40511] cursor-pointer flex-shrink-0"
+                  />
+                  <span className="text-sm text-[#1a1a1a]">
+                    I&apos;ve reviewed the answer key and understand what I need to work on.
+                  </span>
+                </label>
+              )}
+
               {/* Actions */}
-              <div className="flex gap-3 mt-4" id="quiz-actions">
+              <div className="flex gap-3 mt-3" id="quiz-actions">
                 {!isRevealed ? (
                   <button
                     onClick={() => {
@@ -545,7 +590,12 @@ export default function AssessmentPage() {
                       // Scroll to top for next question
                       window.scrollTo({ top: 0, behavior: "smooth" });
                     }}
-                    className="flex-1 bg-[#D40511] hover:bg-[#b8040f] text-white border border-[#a3030e] rounded-[3px] px-4 py-3 text-sm font-bold cursor-pointer transition"
+                    disabled={!acknowledged[current.id]}
+                    className={`flex-1 rounded-[3px] px-4 py-3 text-sm font-bold border transition ${
+                      acknowledged[current.id]
+                        ? "bg-[#D40511] hover:bg-[#b8040f] text-white border-[#a3030e] cursor-pointer"
+                        : "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed"
+                    }`}
                   >
                     {isLast ? "Complete Quiz \u2713" : "Next \u2192"}
                   </button>
