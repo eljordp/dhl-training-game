@@ -7,14 +7,6 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const { pathname } = request.nextUrl;
-  const protectedPaths = ["/game", "/quiz", "/mc-quiz", "/results", "/dashboard"];
-  const isProtected = protectedPaths.some((p) => pathname.startsWith(p));
-
-  if (!isProtected) {
-    return NextResponse.next();
-  }
-
   const sessionCookie = request.cookies.get(SESSION_COOKIE_NAME);
 
   if (!sessionCookie?.value) {
@@ -31,11 +23,6 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    "/game/:path*",
-    "/quiz/:path*",
-    "/mc-quiz/:path*",
-    "/results/:path*",
-    "/dashboard/:path*",
-  ],
+  // Training routes are intentionally public; manager reporting stays private.
+  matcher: ["/dashboard/:path*"],
 };
