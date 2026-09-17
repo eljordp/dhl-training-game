@@ -4,9 +4,14 @@ import { useState, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import DHLHeader from "@/components/DHLHeader";
 import { assessmentQuestions, TIER_CONFIG, AssessmentTier } from "@/data/assessment";
-import { gradeAssessment, gradeQuestion, AssessmentGradeResult, GradedAnswer } from "@/lib/gradeAssessment";
+import { summarizeGrades, gradeQuestion, AssessmentGradeResult, GradedAnswer, GRADING_VERSION } from "@/lib/gradeAssessment";
 import { saveQuizAttempt } from "@/lib/tracking";
 import { useActivityTracker } from "@/lib/useActivityTracker";
+
+function References({ urls }: { urls?: string[] }) {
+  if (!urls?.length) return null;
+  return <p className="mt-2 text-xs text-gray-600">Reference: {urls.map((url, i) => <a key={url} href={url} target="_blank" rel="noreferrer" className="underline mr-3">Official source {i+1}</a>)}</p>;
+}
 
 type Mode = "select" | "assessment" | "review";
 
@@ -19,9 +24,13 @@ export default function AssessmentPage() {
   const [revealed, setRevealed] = useState<Record<string, boolean>>({});
   const [questionGrades, setQuestionGrades] = useState<Record<string, GradedAnswer>>({});
   const [acknowledged, setAcknowledged] = useState<Record<string, boolean>>({});
-  const [startTime] = useState(Date.now());
+  const [startTime, setStartTime] = useState<number | null>(null);
+  const [timeSpent, setTimeSpent] = useState(0);
+  const [saveStatus, setSaveStatus] = useState("Results stay in this browser unless saved to a signed-in account. Download a copy to share.");
+  const saveStarted = useRef(false);
+  const attemptSequence = useRef(0);
   const [gradeResult, setGradeResult] = useState<AssessmentGradeResult | null>(null);
-  const savedRef = useRef(false);
+
 
   function speakText(text: string) {
     if (typeof window === "undefined" || !window.speechSynthesis) return;
@@ -45,35 +54,66 @@ export default function AssessmentPage() {
   const isLast = currentIndex === questions.length - 1;
   const progressPct = questions.length > 0 ? ((currentIndex + 1) / questions.length) * 100 : 0;
 
-  // Compute grade when entering review mode
-  const grade = useMemo(() => {
-    if (mode !== "review") return null;
-    if (gradeResult) return gradeResult;
-    const result = gradeAssessment(questions, answers);
+  const grade = gradeResult;
+
+  function handleStartAssessment(tier: AssessmentTier | "all") {
+    attemptSequence.current += 1;
+    saveStarted.current = false;
+    setSelectedTier(tier);
+    setCurrentIndex(0);
+    setAnswers({});
+    setRevealed({});
+    setQuestionGrades({});
+    setAcknowledged({});
+    setGradeResult(null);
+    setTimeSpent(0);
+    // This is called only by the start button, not during render.
+    // eslint-disable-next-line react-hooks/purity
+    setStartTime(Date.now());
+    setSaveStatus("Results stay in this browser unless saved to a signed-in account. Download a copy to share.");
+    setMode("assessment");
+  }
+
+  function handleCompleteAssessment() {
+    // Reuse the exact grades shown after submission; do not grade again in render.
+    const grades = questions.map(q => questionGrades[q.id]);
+    if (grades.some(g => !g) || saveStarted.current) return;
+    saveStarted.current = true;
+    const sequence = attemptSequence.current;
+    const result = summarizeGrades(grades);
+    // This is called only by the completion button; freeze the displayed time.
+    // eslint-disable-next-line react-hooks/purity
+    const elapsed = startTime === null ? 0 : Math.max(0, Math.round((Date.now() - startTime) / 1000));
+    setTimeSpent(elapsed);
     setGradeResult(result);
+    setMode("review");
+    setSaveStatus("Checking whether this attempt can be saved…");
+    void saveQuizAttempt(result.overallScore, result.totalQuestions, result.totalCorrect, elapsed,
+      result.gradedAnswers.map(a => ({ questionId: a.questionId, category: a.tier,
+        correct: !a.reviewRequired && a.score >= 70, userAnswer: a.userAnswer, score: a.score,
+        reviewRequired: a.reviewRequired, gradingVersion: GRADING_VERSION })), selectedTier || "all")
+      .then(status => { if (sequence !== attemptSequence.current) return; setSaveStatus(status === "saved" ? "Saved to your signed-in account."
+        : status === "guest" ? "Guest attempt — not sent to a manager. Download your results to share them."
+        : "Could not save this attempt. Download your results before leaving this page."); });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
 
-    // Save to DB (once)
-    if (!savedRef.current) {
-      savedRef.current = true;
-      const timeSpent = Math.round((Date.now() - startTime) / 1000);
-      saveQuizAttempt(
-        result.overallScore,
-        result.totalQuestions,
-        result.totalCorrect,
-        timeSpent,
-        result.gradedAnswers.map((a) => ({
-          questionId: a.questionId,
-          category: a.tier,
-          correct: a.score >= 70,
-          userAnswer: a.userAnswer,
-          score: a.score,
-        })),
-        selectedTier === "all" ? "all" : selectedTier || "unknown"
-      );
-    }
-
-    return result;
-  }, [mode, gradeResult, questions, answers, startTime, selectedTier]);
+  function downloadResults() {
+    if (!grade) return;
+    const lines = ["DHL practice quiz — concept review", `Grading: ${GRADING_VERSION}`,
+      `Recognized ideas: ${grade.overallScore}%`, `Answers needing review: ${grade.reviewCount}`,
+      `Time: ${timeSpent} seconds`, "Automated practice feedback, not certification.", "",
+      ...questions.flatMap((q, i) => {
+        const a = grade.gradedAnswers[i];
+        return [`${i+1}. ${q.question}`, `Answer: ${a.userAnswer}`,
+          `Recognized: ${a.score}% — ${a.reviewRequired ? "needs review" : "all core ideas recognized"}`,
+          ...a.feedback.map(point => `Review: ${point}`), ""];
+      })];
+    const url = URL.createObjectURL(new Blob([lines.join("\n")], { type: "text/plain;charset=utf-8" }));
+    const link = document.createElement("a");
+    link.href = url; link.download = "dhl-quiz-results.txt"; link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
 
   // Build a lookup for graded answers
   const gradedMap = useMemo(() => {
@@ -107,16 +147,17 @@ export default function AssessmentPage() {
             <div className="bg-white border border-[#ddd] rounded-sm shadow-sm">
               <div className="bg-[#FFCC00] px-6 py-3 border-b border-[#e6b800]">
                 <h2 className="font-bold text-[#1a1a1a] text-lg">DHL Express Quiz</h2>
-                <p className="text-xs text-[#555] mt-0.5">37 Questions | 4 Tiers | Built for Real Operators</p>
+                <p className="text-xs text-[#555] mt-0.5">37 Questions | 4 Tiers | Practice and review</p>
               </div>
               <div className="px-6 py-6 space-y-3">
+                <p className="text-sm text-gray-600">Answer in your own words. The free automatic check recognizes common ways of expressing the core ideas. Unrecognized or conflicting answers need review; wording alone is not proof of a wrong answer.</p>
                 {tiers.map((tier) => {
                   const cfg = TIER_CONFIG[tier];
                   const count = assessmentQuestions.filter((q) => q.tier === tier).length;
                   return (
                     <button
                       key={tier}
-                      onClick={() => { setSelectedTier(tier); setMode("assessment"); }}
+                      onClick={() => handleStartAssessment(tier)}
                       className={`w-full text-left px-5 py-4 rounded-[3px] border-2 ${cfg.borderColor} ${cfg.bgColor} hover:shadow-md transition cursor-pointer`}
                     >
                       <div className="flex items-center justify-between mb-1">
@@ -129,7 +170,7 @@ export default function AssessmentPage() {
                 })}
 
                 <button
-                  onClick={() => { setSelectedTier("all"); setMode("assessment"); }}
+                  onClick={() => handleStartAssessment("all")}
                   className="w-full text-left px-5 py-4 rounded-[3px] border-2 border-[#D40511] bg-red-50 hover:shadow-md transition cursor-pointer"
                 >
                   <div className="flex items-center justify-between mb-1">
@@ -157,10 +198,10 @@ export default function AssessmentPage() {
 
   // Review mode — show all answers with grading
   if (mode === "review" && grade) {
-    const totalTime = Math.round((Date.now() - startTime) / 1000);
+    const totalTime = timeSpent;
     const mins = Math.floor(totalTime / 60);
     const secs = totalTime % 60;
-    const passed = grade.overallScore >= 70;
+    const passed = grade.overallScore >= 70 && grade.reviewCount === 0;
 
     return (
       <div className="min-h-[100dvh] flex flex-col bg-white" style={{ fontFamily: "Arial, sans-serif" }}>
@@ -174,24 +215,27 @@ export default function AssessmentPage() {
               </div>
               <div className="px-6 py-5">
                 {/* Overall score + pass/fail */}
-                <div className="flex items-center justify-center gap-6 mb-5">
+                <div className="flex flex-wrap items-center justify-center gap-4 mb-5">
                   <div className={`text-center border-2 rounded-[3px] px-6 py-4 ${scoreBgColor(grade.overallScore)}`}>
                     <div className={`text-4xl font-bold ${scoreColor(grade.overallScore)}`}>{grade.overallScore}%</div>
-                    <div className="text-xs text-gray-500 font-medium mt-1">Overall Score</div>
+                    <div className="text-xs text-gray-500 font-medium mt-1">Recognized Ideas</div>
                   </div>
                   <div className="text-center">
                     <div className={`text-lg font-bold px-4 py-2 rounded-[3px] border-2 ${passed ? "bg-green-50 border-green-400 text-green-800" : "bg-red-50 border-[#D40511] text-[#D40511]"}`}>
-                      {passed ? "PASSED" : "NEEDS WORK"}
+                      {passed ? "CORE IDEAS RECOGNIZED" : "REVIEW NEEDED"}
                     </div>
-                    <div className="text-xs text-gray-500 mt-1">70% required to pass</div>
+                    <div className="text-xs text-gray-500 mt-1">Automated practice feedback</div>
                   </div>
                 </div>
 
+                <p className="text-sm text-gray-600 mb-3">Each question has equal weight. The percentage shows recognized core ideas, including partial credit. {grade.reviewCount} answer(s) need review before drawing a conclusion about readiness.</p>
+                <p role="status" className="text-sm text-gray-600 mb-3">{saveStatus}</p>
+                <button onClick={downloadResults} className="border rounded px-4 py-2 mb-4 font-bold text-sm cursor-pointer">Download results</button>
                 {/* Stats row */}
                 <div className="flex gap-4 text-center mb-5">
                   <div className="flex-1 bg-[#f5f5f5] rounded-[3px] px-3 py-3">
                     <div className="text-xl font-bold text-[#1a1a1a]">{grade.totalCorrect}/{grade.totalQuestions}</div>
-                    <div className="text-xs text-gray-500">Questions Passed</div>
+                    <div className="text-xs text-gray-500">Answers Fully Recognized</div>
                   </div>
                   <div className="flex-1 bg-[#f5f5f5] rounded-[3px] px-3 py-3">
                     <div className="text-xl font-bold text-[#1a1a1a]">{mins}m {secs}s</div>
@@ -211,7 +255,7 @@ export default function AssessmentPage() {
                       <div key={tier} className="flex items-center justify-between px-4 py-2.5 border-t border-gray-100">
                         <span className={`text-sm font-bold ${cfg.color}`}>{cfg.label}</span>
                         <div className="flex items-center gap-3">
-                          <span className="text-xs text-gray-500">{data.passed}/{data.total} passed</span>
+                          <span className="text-xs text-gray-500">{data.passed}/{data.total} fully recognized</span>
                           <span className={`text-sm font-bold ${scoreColor(data.score)}`}>{data.score}%</span>
                         </div>
                       </div>
@@ -223,7 +267,7 @@ export default function AssessmentPage() {
 
             {/* Personalized Training Focus */}
             {(() => {
-              const failedQuestions = grade.gradedAnswers.filter((a) => a.score < 70);
+              const failedQuestions = grade.gradedAnswers.filter((a) => a.reviewRequired);
               if (failedQuestions.length === 0) return null;
 
               // Group failed questions by topic area
@@ -239,22 +283,22 @@ export default function AssessmentPage() {
 
                 if (qText.includes("doc") && qText.includes("non-doc") || qText.includes("service type") || qText.includes("wpx") || qText.includes("dox")) {
                   topic = "Shipment Classification";
-                  tip = "Know the difference between DOC (documents, no value) and NON-DOC (goods with value). Know when to use WPX, DOX, EXP, ECX.";
+                  tip = "Know the difference between DOC (documents, no value) and NON-DOC (goods with value). Verify DOX, WPX and ECX against the current product guide.";
                 } else if (qText.includes("customs") || qText.includes("hs code") || qText.includes("harmonized") || qText.includes("country of origin")) {
                   topic = "Customs & Compliance";
-                  tip = "Every international shipment needs customs docs. Country of origin = where the product was MADE, not where it ships from.";
+                  tip = "Check the documents required for the goods and destination. Origin follows applicable production/manufacturing rules, not just the dispatch address.";
                 } else if (qText.includes("value") || qText.includes("declared") || qText.includes("undervalue") || qText.includes("$")) {
                   topic = "Declared Value & Pricing";
-                  tip = "Never enter $0 for physical goods. Always declare the fair market value. Undervaluing is fraud — customs can seize the shipment.";
+                  tip = "Use supportable customs values. Never invent token amounts or knowingly submit a false declaration.";
                 } else if (qText.includes("phone") || qText.includes("address") || qText.includes("po box") || qText.includes("contact")) {
                   topic = "Contact Info & Addresses";
-                  tip = "Phone number is required — without it, delivery fails. DHL Express doesn't deliver to PO Boxes. Always get a physical street address.";
+                  tip = "Verify a reachable receiver number and deliverable physical address. Missing contact details can cause delays or returns.";
                 } else if (qText.includes("dangerous") || qText.includes("lithium") || qText.includes("perfume") || qText.includes("battery")) {
                   topic = "Dangerous Goods";
-                  tip = "Perfume, loose lithium batteries, and aerosols are dangerous goods. Always check — don't rely on what the customer tells you.";
+                  tip = "Check actual contents and dangerous-goods acceptance rules. Perfume, batteries and aerosols may need special handling or may not be accepted.";
                 } else if (qText.includes("invoice") || qText.includes("commercial") || qText.includes("multi-piece") || qText.includes("item")) {
                   topic = "Commercial Invoice";
-                  tip = "Different product types need separate line items with their own HS codes. Always create the invoice in CRA — even if the customer brings their own.";
+                  tip = "Describe distinct commodities on separate lines with accurate quantities, values, origin and tariff classification. Validate supplied invoices and follow the approved local workflow.";
                 } else if (qText.includes("weight") || qText.includes("dimensional") || qText.includes("volumetric")) {
                   topic = "Weight & Dimensions";
                   tip = "DHL charges the higher of actual weight vs dimensional weight. Formula: (L × W × H in cm) ÷ 5000.";
@@ -282,8 +326,8 @@ export default function AssessmentPage() {
               return (
                 <div className="bg-white border-2 border-[#D40511] rounded-sm shadow-sm mb-4">
                   <div className="bg-[#D40511] px-6 py-3">
-                    <h2 className="font-bold text-white text-lg">Your Training Focus</h2>
-                    <p className="text-red-100 text-xs mt-0.5">Based on your answers, here{"'"}s what to work on</p>
+                    <h2 className="font-bold text-white text-lg">Review Together</h2>
+                    <p className="text-red-100 text-xs mt-0.5">These topics contain ideas the automatic check could not confirm.</p>
                   </div>
                   <div className="px-6 py-5 space-y-4">
                     {sortedTopics.map(([topic, data]) => (
@@ -291,7 +335,7 @@ export default function AssessmentPage() {
                         <div className="bg-red-50 px-4 py-2.5 flex items-center justify-between">
                           <span className="text-sm font-bold text-[#D40511]">{topic}</span>
                           <span className="text-xs bg-[#D40511] text-white px-2 py-0.5 rounded-full font-bold">
-                            {data.count} missed
+                            {data.count} to review
                           </span>
                         </div>
                         {data.tips.map((tip, i) => (
@@ -304,7 +348,7 @@ export default function AssessmentPage() {
 
                     <div className="bg-[#FFF8E0] border border-[#FFCC00] rounded-[3px] px-4 py-3 mt-2">
                       <p className="text-sm text-[#1a1a1a] font-medium">
-                        Review the questions you missed below — pay attention to the answer key and missed points for each one.
+                        Compare your wording with the core ideas below. An unrecognized idea may need clarification rather than correction.
                       </p>
                     </div>
                   </div>
@@ -317,7 +361,7 @@ export default function AssessmentPage() {
               const cfg = TIER_CONFIG[q.tier];
               const userAnswer = answers[q.id] || "";
               const ga = gradedMap[q.id];
-              const qPassed = ga && ga.score >= 70;
+              const qPassed = ga && !ga.reviewRequired;
 
               return (
                 <div key={q.id} className="bg-white border border-[#ddd] rounded-sm shadow-sm mb-3">
@@ -326,7 +370,7 @@ export default function AssessmentPage() {
                       <span className="text-xs text-gray-500 font-medium">Question {idx + 1}</span>
                       {ga && (
                         <span className={`text-xs font-bold px-2 py-0.5 rounded-full border ${qPassed ? "bg-green-50 text-green-800 border-green-400" : "bg-red-50 text-[#D40511] border-[#D40511]"}`}>
-                          {qPassed ? "PASS" : "NEEDS REVIEW"} — {ga.score}%
+                          {qPassed ? "RECOGNIZED" : "NEEDS REVIEW"} — {ga.score}%
                         </span>
                       )}
                     </div>
@@ -365,7 +409,7 @@ export default function AssessmentPage() {
                             return (
                               <li key={i} className={`text-sm flex gap-2 ${wasMissed ? "text-orange-700" : "text-green-900"}`}>
                                 <span className={`flex-shrink-0 ${wasMissed ? "text-orange-500" : "text-green-600"}`}>
-                                  {wasMissed ? "\u2717" : "\u2713"}
+                                  {wasMissed ? "?" : "\u2713"}
                                 </span>
                                 <span>{point}</span>
                               </li>
@@ -380,11 +424,12 @@ export default function AssessmentPage() {
                       </div>
                     </div>
 
+                    <References urls={current.sources} />
                     {/* Missed points callout */}
                     {ga && ga.feedback.length > 0 && (
                       <div className="mt-2 bg-orange-50 border border-orange-200 rounded-[3px] px-3 py-2">
                         <div className="text-xs font-bold text-orange-700 uppercase tracking-wide mb-1">
-                          Missed Points ({ga.feedback.length})
+                          Ideas to Review ({ga.feedback.length})
                         </div>
                         <ul className="space-y-0.5">
                           {ga.feedback.map((point, i) => (
@@ -404,7 +449,7 @@ export default function AssessmentPage() {
             {/* Actions */}
             <div className="flex flex-col sm:flex-row gap-3 mt-4">
               <button
-                onClick={() => { setMode("select"); setSelectedTier(null); setCurrentIndex(0); setAnswers({}); setRevealed({}); setQuestionGrades({}); setGradeResult(null); savedRef.current = false; }}
+                onClick={() => { setMode("select"); setSelectedTier(null); }}
                 className="flex-1 bg-[#FFCC00] hover:bg-[#e6b800] text-[#1a1a1a] border border-[#cca300] rounded-[3px] px-4 py-3 text-sm font-bold cursor-pointer transition"
               >
                 TRY ANOTHER TIER
@@ -463,6 +508,8 @@ export default function AssessmentPage() {
               <textarea
                 className="w-full border border-[#ccc] rounded-[3px] px-3 py-2.5 text-sm focus:outline-none focus:border-[#D40511] resize-none"
                 style={{ fontFamily: "Arial, sans-serif", minHeight: "120px" }}
+                aria-label="Your answer"
+                maxLength={4000}
                 placeholder="Type your answer..."
                 value={userAnswer}
                 onChange={(e) => setAnswers({ ...answers, [current.id]: e.target.value })}
@@ -472,7 +519,7 @@ export default function AssessmentPage() {
               {/* Answer key + instant grade (revealed) */}
               {isRevealed && (() => {
                 const qg = questionGrades[current.id];
-                const qPassed = qg && qg.score >= 70;
+                const qPassed = qg && !qg.reviewRequired;
                 return (
                   <>
                     {/* Grade badge */}
@@ -481,15 +528,16 @@ export default function AssessmentPage() {
                         <span className={`text-2xl font-bold ${qPassed ? "text-green-700" : "text-[#D40511]"}`}>{qg.score}%</span>
                         <div>
                           <span className={`text-sm font-bold ${qPassed ? "text-green-800" : "text-[#D40511]"}`}>
-                            {qPassed ? "PASS" : "NEEDS REVIEW"}
+                            {qPassed ? "RECOGNIZED" : "NEEDS REVIEW"}
                           </span>
                           <span className="text-xs text-gray-500 ml-2">
-                            {qg.matchedPoints}/{qg.totalPoints} key points matched
+                            {qg.matchedPoints}/{qg.totalPoints} core ideas recognized
                           </span>
                         </div>
                       </div>
                     )}
 
+                    {qg?.reviewRequired && <p role="status" className="mt-3 text-sm text-amber-800">{qg.reviewReason}</p>}
                     {/* Answer key with per-bullet checkmarks */}
                     <div className="mt-3 bg-green-50 border border-green-200 rounded-[3px] px-4 py-3">
                       <div className="flex items-center justify-between mb-2">
@@ -509,7 +557,7 @@ export default function AssessmentPage() {
                           return (
                             <li key={i} className={`text-sm flex gap-2 ${wasMissed ? "text-orange-700" : "text-green-900"}`}>
                               <span className={`flex-shrink-0 ${wasMissed ? "text-orange-500" : "text-green-600"}`}>
-                                {wasMissed ? "\u2717" : "\u2713"}
+                                {wasMissed ? "?" : "\u2713"}
                               </span>
                               <span>{point}</span>
                             </li>
@@ -523,11 +571,12 @@ export default function AssessmentPage() {
                       )}
                     </div>
 
+                    <References urls={current.sources} />
                     {/* Missed points callout */}
                     {qg && qg.feedback.length > 0 && (
                       <div className="mt-2 bg-orange-50 border border-orange-200 rounded-[3px] px-3 py-2">
                         <div className="text-xs font-bold text-orange-700 uppercase tracking-wide mb-1">
-                          Missed Points ({qg.feedback.length})
+                          Ideas to Review ({qg.feedback.length})
                         </div>
                         <ul className="space-y-0.5">
                           {qg.feedback.map((point, i) => (
@@ -553,7 +602,7 @@ export default function AssessmentPage() {
                     className="mt-0.5 w-4 h-4 accent-[#D40511] cursor-pointer flex-shrink-0"
                   />
                   <span className="text-sm text-[#1a1a1a]">
-                    I&apos;ve reviewed the answer key and understand what I need to work on.
+                    I’ve compared my answer with the core ideas and noted anything to clarify.
                   </span>
                 </label>
               )}
@@ -585,7 +634,7 @@ export default function AssessmentPage() {
                 ) : (
                   <button
                     onClick={() => {
-                      if (isLast) { setMode("review"); return; }
+                      if (isLast) { handleCompleteAssessment(); return; }
                       setCurrentIndex(currentIndex + 1);
                       // Scroll to top for next question
                       window.scrollTo({ top: 0, behavior: "smooth" });

@@ -6,7 +6,8 @@ export interface AssessmentQuestion {
   tierNumber: number; // 1, 2, 3, or 4 (bonus)
   question: string;
   answerKey: string[]; // bullet points of the correct answer
-  warningNote?: string; // ⚠️ risk/impact note
+  warningNote?: string; // Context, not an extra scored requirement
+  sources?: string[];
 }
 
 export const assessmentQuestions: AssessmentQuestion[] = [
@@ -19,23 +20,24 @@ export const assessmentQuestions: AssessmentQuestion[] = [
     tierNumber: 1,
     question: "When does DHL classify a shipment as DOC vs NON-DOC, and what's the financial impact of misclassification?",
     answerKey: [
-      "DOC (DOX): Paper only, no commercial value (contracts, passports)",
-      "NON-DOC (WPX/EXP): Anything with value or goods",
+      "Documents are eligible paperwork without commercial value; check destination classification rules.",
+      "Goods and merchandise are non-document shipments and need accurate customs information.",
+      "Wrong classification can cause clearance delays, corrected charges or penalties."
     ],
     warningNote: "Misclassifying = customs delays, re-billing, penalties",
   },
   {
     id: "t1-2",
+    sources: ["https://support.dhlexpresscommerce.com/hc/en-gb/articles/900003468466-Setup-DHL-Express"],
     tier: "fundamentals",
     tierNumber: 1,
-    question: "Explain when to use each service type: WPX, DOX, EXP, ECX",
+    question: "Explain DOX, WPX and ECX, and how you verify which service is available for a shipment.",
     answerKey: [
-      "DOX: Documents only",
-      "WPX: Worldwide Parcel Express (default non-doc)",
-      "EXP: Time-definite express",
-      "ECX: Economy (slower, cheaper)",
+      "DOX is the document product; WPX is the parcel/non-document Express Worldwide product in the applicable system.",
+      "ECX is Express Worldwide within the European Union, not Economy Select.",
+      "Check the current DHL product guide or booking system for the origin, destination and delivery commitment."
     ],
-    warningNote: "Wrong service = pricing + transit failure",
+    warningNote: "Product codes and availability depend on the system and shipping lane. Do not guess the meaning of an unfamiliar code.",
   },
   {
     id: "t1-3",
@@ -43,20 +45,21 @@ export const assessmentQuestions: AssessmentQuestion[] = [
     tierNumber: 1,
     question: "What happens if shipper and payer are different, but the payer account is invalid?",
     answerKey: [
-      "Shipment gets held or re-billed to shipper",
-      "Can delay movement instantly",
+      "An invalid payer account can stop processing, delay movement or cause charges to be billed back to the shipper.",
+      "Verify the payer account and obtain an authorized valid payment arrangement before processing."
     ],
   },
   {
     id: "t1-4",
+    sources: ["https://mydhlplus.dhl.com/content/dam/downloads/global/en/t-c/terms_conditions_of_carriage_en-2024.pdf.coredownload.pdf"],
     tier: "fundamentals",
     tierNumber: 1,
     question: "What is the exact difference between declared value for carriage vs customs value?",
     answerKey: [
-      "Declared value (carriage): DHL liability coverage",
-      "Customs value: Used for duties/taxes calculation",
+      "Carriage value concerns carrier liability or optional shipment protection for loss or damage, subject to the terms.",
+      "Customs value is used for customs assessment, including duties and taxes."
     ],
-    warningNote: "Must match logically or shipment gets flagged",
+    warningNote: "Declaring a value does not automatically purchase insurance. Customs value and coverage are different concepts.",
   },
   {
     id: "t1-5",
@@ -64,9 +67,8 @@ export const assessmentQuestions: AssessmentQuestion[] = [
     tierNumber: 1,
     question: "A shipment is under 0.5kg — why might it still be rated at a higher weight?",
     answerKey: [
-      "Due to dimensional (volumetric) weight",
-      "Formula: (L × W × H in cm) ÷ 5000",
-      "DHL charges whichever is higher: actual vs volumetric",
+      "Chargeable weight can exceed scale weight because dimensional weight is based on package size.",
+      "DHL compares actual and volumetric weight and uses the higher weight, subject to applicable rounding and minimums."
     ],
   },
   {
@@ -84,13 +86,12 @@ export const assessmentQuestions: AssessmentQuestion[] = [
     id: "t1-7",
     tier: "fundamentals",
     tierNumber: 1,
-    question: "When is signature release NOT allowed, even if customer requests it?",
+    question: "A customer requests delivery without a signature. What must you check before agreeing?",
     answerKey: [
-      "High-value shipments",
-      "Certain countries with strict delivery rules",
-      "Dangerous goods shipments",
+      "Check whether signature release is offered for this shipment, destination and service, including shipper restrictions.",
+      "Do not override a mandatory signature requirement; confirm with DHL if eligibility is unclear."
     ],
-    warningNote: "Liability issue — releasing without signature can make DHL responsible",
+    warningNote: "Do not assume that every high-value or dangerous-goods shipment has the same release rule.",
   },
   {
     id: "t1-8",
@@ -98,9 +99,8 @@ export const assessmentQuestions: AssessmentQuestion[] = [
     tierNumber: 1,
     question: "What are the risks of using a personal name instead of a company name on a commercial shipment?",
     answerKey: [
-      "Company name improves customs clearance speed",
-      "Personal name may cause delays and ID verification issues",
-      "Some countries require company name for commercial imports",
+      "Using a person instead of the legal business can create a mismatch with the importer, tax ID or invoice.",
+      "Use the correct legal consignee/company and a separate contact person to reduce identification and clearance delays."
     ],
   },
   {
@@ -109,20 +109,20 @@ export const assessmentQuestions: AssessmentQuestion[] = [
     tierNumber: 1,
     question: "Explain how dimensional weight overrides actual weight. What's the formula?",
     answerKey: [
-      "DHL charges whichever is higher: actual weight vs volumetric weight",
-      "Formula: (L × W × H in cm) ÷ 5000",
-      "A large but light box can cost more than a small heavy one",
-    ],
+      "Chargeable weight is the higher of actual and volumetric weight.",
+      "For the applicable DHL Express calculation: length × width × height in centimetres divided by 5000 gives kilograms."
+    ],    warningNote: "An example can help explain this, but no particular box dimensions or wording are required.",
   },
   {
     id: "t1-10",
+    sources: ["https://mydhlplus.dhl.com/content/dam/downloads/global/en/t-c/terms_conditions_of_carriage_en-2024.pdf.coredownload.pdf"],
     tier: "fundamentals",
     tierNumber: 1,
     question: "Why is a missing phone number more serious than most employees think?",
     answerKey: [
-      "Critical for customs contact during clearance",
-      "Required for delivery coordination and scheduling",
-      "Missing number = delays, failed delivery, or returns",
+      "A reachable receiver number helps DHL or customs obtain clearance information.",
+      "It also supports delivery arrangements and resolving delivery problems.",
+      "Without contact details a shipment may be delayed, undeliverable or returned."
     ],
   },
 
@@ -135,21 +135,20 @@ export const assessmentQuestions: AssessmentQuestion[] = [
     tierNumber: 2,
     question: "Customer says 'sample, no value' — what do you enter and why?",
     answerKey: [
-      "NEVER enter $0 for physical goods",
-      "Must declare fair market value (even $5–$20 for samples)",
-      "Customs requires a declared value for all goods",
-    ],
+      "Do not enter zero merely because goods are a free sample.",
+      "Obtain a supportable value for customs and describe the sample accurately."
+    ],    warningNote: "Do not invent a token value such as $5 or $20. Verify the appropriate valuation for the actual goods.",
   },
   {
     id: "t2-2",
+    sources: ["https://www.dhl.com/discover/zh-tw/ship-with-dhl/export-with-dhl/saudi-arabia-regulatory", "https://rulebook.sama.gov.sa/en/providing-postal-service-providers-national-address"],
     tier: "operations",
     tierNumber: 2,
-    question: "Shipment to Saudi Arabia — what 3 things must NEVER be missing?",
+    question: "Before accepting goods for Saudi Arabia, what address, contact and customs information do you verify?",
     answerKey: [
-      "Accurate, detailed description of contents",
-      "Commercial invoice with correct values",
-      "Receiver phone number",
-      "Often also requires receiver ID or company registration info",
+      "Verify the required Saudi National Address or Short Address Code.",
+      "Obtain a reachable receiver phone number and any required importer ID or business registration.",
+      "Check the item descriptions, accurate customs invoice values and current destination requirements."
     ],
   },
   {
@@ -158,10 +157,9 @@ export const assessmentQuestions: AssessmentQuestion[] = [
     tierNumber: 2,
     question: "Multi-piece shipment (3 boxes) — one box has different content. How do you invoice and declare it?",
     answerKey: [
-      "Must list each item type separately on the commercial invoice",
-      "NOT one combined description — different HS codes, different lines",
-      "Each line needs: description, quantity, value, country of origin",
-    ],
+      "List distinct commodities on separate invoice lines rather than a single combined description.",
+      "Include accurate descriptions, quantities, values, origin and appropriate tariff classification for the goods."
+    ],    warningNote: "Different boxes alone do not require different HS codes; classification follows the actual goods.",
   },
   {
     id: "t2-4",
@@ -169,9 +167,8 @@ export const assessmentQuestions: AssessmentQuestion[] = [
     tierNumber: 2,
     question: "Customer intentionally undervalues goods — what are your responsibilities?",
     answerKey: [
-      "Warn the customer about consequences — undervaluation can lead to seizure, fines, or shipment destruction",
-      "Refuse to process if clearly fraudulent",
-      "Declaring inaccurate value is fraud and illegal — DHL compliance requires accurate declared value on all shipments",
+      "Explain the risks of false values, such as customs holds, seizure or penalties.",
+      "Require accurate values; do not knowingly process an intentionally false declaration."
     ],
   },
   {
@@ -180,21 +177,19 @@ export const assessmentQuestions: AssessmentQuestion[] = [
     tierNumber: 2,
     question: "When does country of origin NOT equal where it shipped from?",
     answerKey: [
-      "Country of origin = where item was manufactured",
-      "NOT where it's being shipped from",
-      "Example: Chinese-made laptop shipped from US → origin is CN",
-    ],
+      "Origin concerns where goods were produced or manufactured under the applicable origin rules.",
+      "A warehouse or dispatch country is not automatically the country of origin."
+    ],    warningNote: "Any valid example is acceptable. Substantial transformation and product-specific origin rules may matter.",
   },
   {
     id: "t2-6",
     tier: "operations",
     tierNumber: 2,
-    question: "What causes a shipment to be flagged by customs inspection automatically?",
+    question: "Name common issues that can trigger customs questions or inspection. Is inspection always predictable?",
     answerKey: [
-      "Undervalued or suspicious declared value relative to item type",
-      "Vague descriptions ('gift', 'sample', 'stuff')",
-      "Data mismatch or discrepancy between AWB (air waybill) and invoice — inconsistent information",
-      "High-risk origin countries or restricted country routes",
+      "Suspicious values or vague descriptions can prompt scrutiny.",
+      "Inconsistent shipment data or missing required information can cause clearance checks.",
+      "Customs can also select shipments for inspection independently; no clearance guarantee is possible."
     ],
   },
   {
@@ -214,32 +209,30 @@ export const assessmentQuestions: AssessmentQuestion[] = [
     tierNumber: 2,
     question: "When is a shipment considered dangerous goods even if the customer says it's not?",
     answerKey: [
-      "Perfumes and cologne are flammable because they contain alcohol — classified as dangerous goods",
-      "Lithium batteries (loose or in devices)",
-      "Aerosol sprays, nail polish, certain liquids",
-      "Employee must check and identify dangerous goods regardless of what customer says or knows",
-    ],
+      "Contents such as lithium batteries, flammable perfume or aerosols may be regulated dangerous goods.",
+      "Verify the actual contents and applicable dangerous-goods acceptance requirements rather than relying on the customer’s assurance."
+    ],    warningNote: "Classification depends on the actual product and transport rules; not every liquid or electronic item has the same requirements.",
   },
   {
     id: "t2-9",
+    sources: ["https://mydhl.express.dhl/br/pt/shipment/service-type.html"],
     tier: "operations",
     tierNumber: 2,
-    question: "Why do shipments to Brazil fail frequently even when info looks correct?",
+    question: "For a goods shipment to Brazil, what can be missing even when the delivery address looks correct?",
     answerKey: [
-      "Brazil requires CPF (individual) or CNPJ (company) tax ID",
-      "Must have detailed commercial invoice with specific item descriptions",
-      "Missing tax ID = automatic customs rejection",
-    ],
+      "Verify the receiver’s valid CPF for an individual or CNPJ for a company.",
+      "Check a detailed accurate customs invoice and current import requirements."
+    ],    warningNote: "Missing or invalid information can block clearance; do not promise a particular customs outcome.",
   },
   {
     id: "t2-10",
+    sources: ["https://mydhlplus.dhl.com/content/dam/downloads/global/en/t-c/terms_conditions_of_carriage_en-2024.pdf.coredownload.pdf"],
     tier: "operations",
     tierNumber: 2,
     question: "PO Box entered for international shipment — what happens operationally?",
     answerKey: [
-      "DHL Express requires a physical street address",
-      "PO Box = delivery failure",
-      "Must get physical address before processing",
+      "DHL Express needs a deliverable physical street address, not just a PO Box.",
+      "Obtain the correct address before processing to avoid a hold, failed delivery or return."
     ],
   },
 
@@ -250,23 +243,21 @@ export const assessmentQuestions: AssessmentQuestion[] = [
     id: "t3-1",
     tier: "expert",
     tierNumber: 3,
-    question: "AWB shows $50 declared value, but the invoice shows $500 — what happens?",
+    question: "The AWB customs value is $50 and the invoice customs value is $500 for the same goods. What is the problem and what do you do?",
     answerKey: [
-      "Shipment gets flagged and held at customs due to value mismatch and data discrepancy",
-      "Considered suspicious undervaluation — potential fraud flag",
-      "Shipment is held and customs won't clear it until the mismatch is resolved",
-    ],
+      "Conflicting customs values can trigger a hold, inspection or an undervaluation query.",
+      "Confirm the true goods value and correct the conflicting records before proceeding."
+    ],    warningNote: "This question compares two customs values, not customs value against separate insurance coverage.",
   },
   {
     id: "t3-2",
     tier: "expert",
     tierNumber: 3,
-    question: "Customer ships 10 identical items but lists Qty: 1, Value: $100. What problem does this cause?",
+    question: "There are 10 identical items. The invoice says quantity 1 and value $100, without saying whether that is unit or total value. What do you check and correct?",
     answerKey: [
-      "Incorrect duties calculation (should be 10 × $100 = $1,000 total)",
-      "Risk of customs seizure for misrepresentation",
-      "Potential fines for both shipper and carrier",
-    ],
+      "Correct the quantity to 10 and clarify whether $100 is the unit price or the total.",
+      "Use accurate unit and total values; the mismatch can cause incorrect duties, delays or penalties."
+    ],    warningNote: "If $100 is each, the total is $1,000. If $100 is the total, do not invent a $1,000 value.",
   },
   {
     id: "t3-3",
@@ -285,32 +276,31 @@ export const assessmentQuestions: AssessmentQuestion[] = [
     tierNumber: 3,
     question: "When does DHL refuse a shipment even after pickup?",
     answerKey: [
-      "Dangerous goods discovered during processing",
-      "Compliance violation (prohibited items, sanctions)",
-      "Fraud suspicion (false declarations, undervaluation)",
-    ],
+      "Undeclared or unacceptable dangerous goods, prohibited contents or sanctions issues can stop transport.",
+      "False declarations, inadequate documents or unsafe packaging can also cause rejection."
+    ],    warningNote: "Pickup does not guarantee final acceptance or customs clearance.",
   },
   {
     id: "t3-5",
+    sources: ["https://mydhlplus.dhl.com/content/dam/downloads/global/en/t-c/terms_conditions_of_carriage_en-2024.pdf.coredownload.pdf"],
     tier: "expert",
     tierNumber: 3,
     question: "Explain how duties & taxes payer selection affects delivery speed.",
     answerKey: [
-      "If duties unpaid or payer unclear → shipment held at customs",
-      "Receiver refusal to pay → return shipment (shipper pays return)",
-      "DTP (Duties/Taxes Paid by shipper) = fastest clearance",
-    ],
+      "Receiver-paid duties can delay clearance or delivery while payment or contact is outstanding.",
+      "A valid shipper-paid duties arrangement can avoid waiting for the receiver’s payment."
+    ],    warningNote: "Payment arrangements do not guarantee faster customs inspection or clearance.",
   },
   {
     id: "t3-6",
+    sources: ["https://www.cbsa-asfc.gc.ca/import/courier/menu-eng.html"],
     tier: "expert",
     tierNumber: 3,
     question: "Why do shipments marked as 'gift' still get taxed?",
     answerKey: [
-      "Countries have gift exemption thresholds (varies by country)",
-      "Over threshold = full duties and taxes apply",
-      "Example: Canada CAD $60, EU €45 — above that, taxed like any import",
-    ],
+      "Gift status does not automatically remove import duties or taxes.",
+      "Exemptions depend on destination rules, eligibility and value limits."
+    ],    warningNote: "For an eligible Canadian gift above CAD $60, applicable duties/taxes are generally assessed on the excess over CAD $60, not automatically the full value. Check current destination rules.",
   },
   {
     id: "t3-7",
@@ -318,22 +308,21 @@ export const assessmentQuestions: AssessmentQuestion[] = [
     tierNumber: 3,
     question: "What's the risk of shipping electronics without proper description?",
     answerKey: [
-      "'Electronics' is too vague — must specify exact item",
-      "Example: 'mobile phone, lithium battery included' not just 'electronics'",
-      "Vague descriptions trigger customs holds and DG screening",
+      "Describe the actual device specifically, including relevant battery details.",
+      "Vague descriptions can prevent correct customs or dangerous-goods checks and cause holds."
     ],
-    warningNote: "Compliance + safety violation risk",
+    warningNote: "No particular device example is required.",
   },
   {
     id: "t3-8",
+    sources: ["https://mydhlplus.dhl.com/content/dam/downloads/global/en/t-c/terms_conditions_of_carriage_en-2024.pdf.coredownload.pdf"],
     tier: "expert",
     tierNumber: 3,
     question: "A shipment is returned — who pays and why?",
     answerKey: [
-      "Usually the shipper pays for return shipping",
-      "Common causes: refused by receiver, failed customs, wrong address",
-      "Return costs can exceed original shipping cost",
-    ],
+      "The shipper is generally responsible for return costs under the carriage terms.",
+      "Returns may follow receiver refusal, nonpayment, an undeliverable address or clearance problems."
+    ],    warningNote: "Confirm the reason and applicable terms before promising a refund or quoting return charges.",
   },
   {
     id: "t3-9",
@@ -341,24 +330,22 @@ export const assessmentQuestions: AssessmentQuestion[] = [
     tierNumber: 3,
     question: "Customer uses wrong HS code intentionally — what happens legally and operationally?",
     answerKey: [
-      "Legal violation — customs fraud",
-      "Goods can be seized by customs",
-      "Fines issued to shipper, potentially to carrier",
-      "Criminal charges possible for repeat offenders",
-    ],
+      "Knowingly using a false HS code can be a customs compliance or fraud issue.",
+      "Possible consequences include holds, duty reassessment, seizure or penalties; do not knowingly process the false declaration."
+    ],    warningNote: "The actual legal outcome depends on the jurisdiction and facts.",
   },
   {
     id: "t3-10",
     tier: "expert",
     tierNumber: 3,
-    question: "What are the top 5 reasons shipments fail internationally, based on real DHL operations?",
+    question: "Give five common preventable causes of international shipment problems.",
     answerKey: [
-      "1. Bad or incomplete commercial invoice",
-      "2. Wrong or underreported declared value",
-      "3. Missing receiver contact info (phone/email)",
-      "4. Restricted or prohibited items not identified",
-      "5. Country-specific requirements not met (tax IDs, licenses, certifications)",
-    ],
+      "Inaccurate or incomplete invoice, goods description, quantities or value.",
+      "Missing or incorrect receiver address or contact information.",
+      "Missing destination documents, importer IDs or permits.",
+      "Prohibited/restricted goods or undeclared dangerous goods.",
+      "Unpaid duties or receiver refusal/nonresponse."
+    ],    warningNote: "These are training examples, not a claimed ranking from DHL operational statistics.",
   },
 
   // ══════════════════════════════════════════════════
@@ -370,10 +357,10 @@ export const assessmentQuestions: AssessmentQuestion[] = [
     tierNumber: 4,
     question: "Customer says: 'Just put $20, it's actually $200 but I don't want taxes.' How do you respond?",
     answerKey: [
-      "\"I understand, but we're required to declare the actual value. If we undervalue it, customs can seize the shipment or fine both you and the carrier.\"",
-      "Refuse the request, explain the consequences professionally — undervaluation leads to seizure, fines, and legal liability",
+      "Require the actual value and refuse the requested false declaration.",
+      "Explain the risk professionally, such as holds, fines or seizure."
     ],
-    warningNote: "Never undervalue at customer's request — personal liability",
+    warningNote: "Escalate unresolved intentional false declarations according to the location’s procedure.",
   },
   {
     id: "sc-2",
@@ -381,8 +368,8 @@ export const assessmentQuestions: AssessmentQuestion[] = [
     tierNumber: 4,
     question: "Customer says: 'It's just stuff.' How do you get a proper description?",
     answerKey: [
-      "Ask for specific description — what type of item, what material, what it's used for",
-      "Vague descriptions cause customs delays and holds — need clear, detailed content descriptions",
+      "Ask what each item is, its material and its intended use; obtain a specific description.",
+      "Do not guess or accept a vague description such as “stuff”."
     ],
   },
   {
@@ -391,8 +378,8 @@ export const assessmentQuestions: AssessmentQuestion[] = [
     tierNumber: 4,
     question: "Customer says: 'It's just a gift' — but there's perfume inside. What do you do?",
     answerKey: [
-      "Perfume contains alcohol, classified as flammable dangerous goods — must check DHL dangerous goods restrictions before shipping",
-      "Employee must identify dangerous goods, don't rely on customer classification or description",
+      "Identify the actual perfume as potentially flammable dangerous goods; “gift” does not decide classification.",
+      "Pause normal processing and check acceptance with trained staff; refuse if it cannot be shipped compliantly."
     ],
   },
   {
@@ -401,18 +388,19 @@ export const assessmentQuestions: AssessmentQuestion[] = [
     tierNumber: 4,
     question: "Customer doesn't want to give receiver's phone number. What do you say?",
     answerKey: [
-      "\"I just need a phone number for the receiver — without it, delivery or customs clearance may fail.\"",
-      "Phone number is required, not optional — delivery and customs clearance depend on it",
+      "Request a valid receiver phone number and explain its role in clearance or delivery.",
+      "Explain the risk of delays or returns and pause if required contact information cannot be obtained."
     ],
   },
   {
     id: "sc-5",
+    sources: ["https://mydhl.express.dhl/br/pt/shipment/service-type.html"],
     tier: "scenarios",
     tierNumber: 4,
     question: "Customer is shipping to Brazil. What do you need to ask for specifically?",
     answerKey: [
-      "\"For Brazil, I'll need the receiver's tax ID — CPF for individuals, CNPJ for companies. Without it, the shipment will not clear customs.\"",
-      "Brazil customs rejects shipments without valid tax identification number (CPF or CNPJ)",
+      "Ask for a valid receiver CPF (individual) or CNPJ (company), as applicable.",
+      "Explain that missing required identification can prevent clearance."
     ],
   },
   {
@@ -421,8 +409,8 @@ export const assessmentQuestions: AssessmentQuestion[] = [
     tierNumber: 4,
     question: "Customer calls angry: 'Why is my package stuck?!' How do you handle it?",
     answerKey: [
-      "Check the invoice, declared value, receiver contact details, and customs status to find the issue",
-      "Stay calm, take control, check the data before escalating",
+      "Check the shipment status and relevant documents or receiver information to find the cause.",
+      "Respond calmly and explain the next action, escalating based on verified information."
     ],
   },
   {
@@ -431,8 +419,8 @@ export const assessmentQuestions: AssessmentQuestion[] = [
     tierNumber: 4,
     question: "Customer insists: 'It always worked before' but shipment is non-compliant. What do you say?",
     answerKey: [
-      "Regulations change, enforcement varies — must follow current DHL and customs compliance rules",
-      "Past shipments clearing doesn't mean they were compliant — previous exceptions don't set precedent",
+      "Follow the current applicable requirements and do not knowingly accept the non-compliant shipment.",
+      "Explain that previous successful delivery does not prove compliance or guarantee acceptance now."
     ],
   },
 ];
@@ -444,7 +432,7 @@ export const TIER_CONFIG: Record<AssessmentTier, { label: string; number: number
     color: "text-green-800",
     bgColor: "bg-green-50",
     borderColor: "border-green-400",
-    description: "High-level fundamentals. These look easy... but they expose gaps fast.",
+    description: "Classification, values, weight and delivery requirements.",
   },
   operations: {
     label: "Tier 2 — Operations & Compliance",
@@ -452,7 +440,7 @@ export const TIER_CONFIG: Record<AssessmentTier, { label: string; number: number
     color: "text-yellow-800",
     bgColor: "bg-yellow-50",
     borderColor: "border-yellow-400",
-    description: "This is where average employees fail.",
+    description: "Customs documentation, destination checks and safe acceptance.",
   },
   expert: {
     label: "Tier 3 — Expert Level",
@@ -460,7 +448,7 @@ export const TIER_CONFIG: Record<AssessmentTier, { label: string; number: number
     color: "text-red-800",
     bgColor: "bg-red-50",
     borderColor: "border-red-400",
-    description: "Only strong operators pass this.",
+    description: "Resolve ambiguous details and explain operational consequences.",
   },
   scenarios: {
     label: "Bonus — Live Scenarios",

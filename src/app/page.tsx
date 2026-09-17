@@ -29,7 +29,7 @@ export default function Home() {
         <div className="w-full max-w-4xl">
           <div className="text-center mb-6 md:mb-8">
             <h1 className="text-[#1a1a1a] text-2xl md:text-3xl font-black tracking-tight">DHL Training Simulator</h1>
-            <p className="text-[#555] text-sm mt-1">Practice real shipment entry, then prove your competency</p>
+            <p className="text-[#555] text-sm mt-1">Practice shipment entry and review your operational knowledge</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -79,7 +79,7 @@ export default function Home() {
                   <h2 className="text-[#1a1a1a] text-lg font-bold">Advanced Knowledge Assessment</h2>
                 </div>
                 <p className="text-xs text-[#555]">
-                  Answer in your own words and receive detailed grading against the operator answer key.
+                  Answer in your own words. Get a free automatic check of core ideas, with uncertain answers flagged for review.
                 </p>
               </div>
 
@@ -115,7 +115,7 @@ export default function Home() {
 
           <div className="text-center mt-6">
             <p className="text-[11px] text-[#aaa]">
-              No login required — start with practice, then use the knowledge assessment to verify readiness
+              No login required — start with practice, then use the knowledge assessment to review your understanding
             </p>
           </div>
         </div>

@@ -34,9 +34,9 @@ export const quizQuestions: QuizQuestion[] = [
     category: "customs",
     difficulty: "beginner",
     question: "A customer ships engine parts to Brazil. Is customs documentation required?",
-    options: ["Only if value exceeds $1,000", "Yes — all international shipments require customs", "No — industrial parts are exempt", "Only if declared value exceeds $5,000"],
+    options: ["Only if value exceeds $1,000", "Yes — these goods require customs documentation", "No — industrial parts are exempt", "Only if declared value exceeds $5,000"],
     correct: 1,
-    explanation: "ALL international shipments require customs documentation regardless of value or content type."
+    explanation: "Engine parts are goods and need the applicable customs documentation for Brazil. Document-only shipments follow different requirements."
   },
   {
     id: "q19",
@@ -74,7 +74,7 @@ export const quizQuestions: QuizQuestion[] = [
     question: "A customer says their documents must arrive at the destination office by 9:00 AM. Which service do you select?",
     options: ["EXPRESS_WORLDWIDE", "EXPRESS_12:00", "ECONOMY_SELECT", "EXPRESS_9:00"],
     correct: 3,
-    explanation: "EXPRESS_9:00 guarantees delivery by 9:00 AM on the next business day."
+    explanation: "Check whether EXPRESS_9:00 is available for the exact lane and postcode and confirm the quoted delivery date and applicable guarantee terms. Do not assume every shipment arrives the next business day."
   },
   {
     id: "q12",
@@ -130,7 +130,7 @@ export const quizQuestions: QuizQuestion[] = [
     question: "A customer wants to send electronics (a tablet worth $500) and clothing ($150) in ONE box to Colombia. How many items do you add in the Commercial Invoice?",
     options: ["1 item — it's one box", "2 items — electronics and clothing are different commodity types", "It doesn't matter as long as the total value is correct", "3 items — tablet, charger, and clothing"],
     correct: 1,
-    explanation: "Different product types need separate line items on the Commercial Invoice because they have different HS codes. Electronics (8471.30) and clothing (6110) must be listed separately."
+    explanation: "List distinct commodities separately with accurate descriptions, quantities, values, origin and the appropriate tariff classification. Exact HS codes depend on the actual products."
   },
   {
     id: "a1",
@@ -139,7 +139,7 @@ export const quizQuestions: QuizQuestion[] = [
     question: "A customer ships a laptop manufactured in China from the US to Germany. What country of origin do you enter on the Commercial Invoice?",
     options: ["US — that's where it's shipping from", "DE — that's the destination", "CN — that's where the laptop was manufactured", "The brand's home country"],
     correct: 2,
-    explanation: "Country of origin is ALWAYS where the product was manufactured, not where it's being shipped from or to. A Chinese-made laptop shipped from the US still has country of origin CN."
+    explanation: "Country of origin follows applicable origin rules, generally where the product was manufactured, not where it's being shipped from or to. A Chinese-made laptop shipped from the US still has country of origin CN."
   },
   {
     id: "a2",
@@ -164,9 +164,9 @@ export const quizQuestions: QuizQuestion[] = [
     category: "scenarios",
     difficulty: "advanced",
     question: "A customer is shipping car parts worth $3,200 to Nigeria. They hand you a commercial invoice they printed themselves. What do you do?",
-    options: ["Use their printed invoice — it's already done", "Create one in the CRA system AND attach their invoice as supporting documentation", "Tell them their invoice is invalid", "Only use CRA if their invoice is missing info"],
+    options: ["Use their printed invoice — it's already done", "Validate the invoice and use the approved submission workflow for this location", "Tell them their invoice is invalid", "Only use CRA if their invoice is missing info"],
     correct: 1,
-    explanation: "You MUST always create the commercial invoice in the CRA system regardless of what the customer provides. Their printed invoice can be attached as supporting docs, but the CRA-generated invoice is what DHL and customs use."
+    explanation: "DHL supports customer-supplied invoices in supported workflows. Check that the invoice is complete and accurate and follow the approved local CRA submission process; do not assume every supplied invoice is invalid."
   },
   {
     id: "a6",

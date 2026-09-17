@@ -1,258 +1,100 @@
-import { AssessmentQuestion, AssessmentTier } from "@/data/assessment";
+import type { AssessmentQuestion, AssessmentTier } from "../data/assessment";
+import { assessmentRubrics } from "../data/assessmentRubrics";
 
+export const PASS_SCORE = 70;
+export const GRADING_VERSION = "concept-rubrics-v2";
 export interface GradedAnswer {
   questionId: string;
   tier: AssessmentTier;
   userAnswer: string;
-  score: number; // 0-100
+  score: number;
   matchedPoints: number;
   totalPoints: number;
-  feedback: string[]; // which answer key points were missed
+  feedback: string[];
+  evidence: (string | null)[];
+  reviewRequired: boolean;
+  reviewReason?: string;
 }
-
 export interface AssessmentGradeResult {
-  overallScore: number; // 0-100
-  totalCorrect: number; // questions scoring >= 70%
+  overallScore: number;
+  totalCorrect: number;
   totalQuestions: number;
+  reviewCount: number;
   tierScores: Record<string, { score: number; total: number; passed: number }>;
   gradedAnswers: GradedAnswer[];
 }
-
-/**
- * Simple stemmer: strip common suffixes to get a rough root form.
- * Not a full NLP stemmer — just enough to match "regulation" → "regulat",
- * "professionally" → "profession", etc.
- */
-function simpleStem(word: string): string {
-  let w = word.toLowerCase();
-  // Order matters — strip longer suffixes first
-  const suffixes = [
-    "ation", "ition", "ment", "ness", "tion", "sion",
-    "ible", "able", "ious", "eous", "ous", "ive",
-    "ing", "ful", "less", "ally", "ily", "ly",
-    "ed", "er", "es", "al",
-  ];
-  for (const suffix of suffixes) {
-    if (w.length > suffix.length + 2 && w.endsWith(suffix)) {
-      return w.slice(0, -suffix.length);
-    }
-  }
-  return w;
+export function normalizeAnswer(answer: string): string {
+  return answer.normalize("NFKC").toLowerCase()
+    .replace(/[’‘]/g, "'").replace(/[–—]/g, "-").replace(/×/g, "x").replace(/÷/g, "/")
+    .replace(/\b(don't|doesn't|can't|won't|shouldn't|mustn't)\b/g, (s) => ({
+      "don't":"do not", "doesn't":"does not", "can't":"cannot", "won't":"will not", "shouldn't":"should not", "mustn't":"must not",
+    }[s]!))
+    .replace(/\s+/g, " ").trim();
 }
 
-/**
- * Synonym / related-term map.
- * Each key maps to a set of words that should be treated as equivalent matches.
- * The map is bidirectional — built from synonym groups below.
+/** A contradiction is a review flag, never a score awarded for matching words.
+ * Negated bad actions ("do not invent a phone number") must not trigger it.
  */
-const SYNONYM_GROUPS: string[][] = [
-  ["fraud", "fraudulent", "fraud flag"],
-  ["hold", "held", "holding"],
-  ["seize", "seized", "seizure"],
-  ["reject", "rejected", "rejection"],
-  ["fine", "fines", "penalty", "penalties"],
-  ["compliant", "compliance", "non-compliant"],
-  ["regulate", "regulated", "regulations", "regulatory"],
-  ["restrict", "restricted", "restrictions"],
-  ["prohibit", "prohibited"],
-  ["declare", "declared", "declaration", "declarations"],
-  ["inspect", "inspection"],
-  ["verify", "verified", "verification"],
-  ["describe", "described", "description", "descriptions"],
-  ["invoice", "invoicing"],
-  ["deliver", "delivery", "delivered"],
-  ["clear", "clearance", "cleared", "clearing"],
-  ["ship", "shipped", "shipping", "shipment", "shipments"],
-  ["custom", "customs"],
-  ["duty", "duties"],
-  ["tax", "taxes", "taxed"],
-  ["charge", "charges", "charged"],
-  ["require", "required", "requirement", "requirements"],
-  ["identify", "identified", "identification"],
-  ["value", "valued", "valuation", "undervalue", "undervalued", "undervaluation"],
-  ["specific", "specifically"],
-  ["detail", "detailed"],
-  ["resolve", "resolved"],
-  ["suspect", "suspected", "suspicious", "suspicion"],
-  ["match", "mismatch", "mismatched", "matching"],
-  ["criminal", "prosecution"],
-  ["precedent", "exception", "exceptions"],
-];
-
-// Build a flat map: word → array of all synonyms (including itself)
-const SYNONYM_MAP = new Map<string, string[]>();
-for (const group of SYNONYM_GROUPS) {
-  for (const word of group) {
-    if (SYNONYM_MAP.has(word)) {
-      // Merge with existing array
-      const existing = SYNONYM_MAP.get(word)!;
-      for (let i = 0; i < group.length; i++) {
-        if (existing.indexOf(group[i]) === -1) {
-          existing.push(group[i]);
-        }
-      }
-    } else {
-      SYNONYM_MAP.set(word, group.slice());
-    }
-  }
+function hasContradiction(answer: string, patterns: RegExp[]): boolean {
+  return patterns.some(pattern => {
+    const match = pattern.exec(answer);
+    if (!match) return false;
+    if (/(?:does not|cannot|never|not) (?:prove|mean|guarantee)/.test(match[0])) return false;
+    const prefix = answer.slice(Math.max(0, match.index - 35), match.index);
+    return !/(?:do not|must not|never|cannot|should not|will not|not to)\s+(?:\w+\s+){0,2}$/.test(prefix);
+  });
 }
 
-/**
- * Check if a term (from the answer key) appears in the user's answer text.
- * Checks: exact substring, synonym substring, and stem-based matching.
- */
-function termExistsInAnswer(term: string, userAnswerLower: string, userAnswerWords: string[]): boolean {
-  // 1. Direct substring match (original behavior)
-  if (userAnswerLower.includes(term)) {
-    return true;
-  }
-
-  // 2. Synonym match — check if any synonym of this term appears in the answer
-  const synonyms = SYNONYM_MAP.get(term);
-  if (synonyms) {
-    for (const syn of synonyms) {
-      if (userAnswerLower.includes(syn)) {
-        return true;
-      }
-    }
-  }
-
-  // 3. Stem-based match — compare stems of the key term against stems of user words
-  const termStem = simpleStem(term);
-  for (const userWord of userAnswerWords) {
-    if (simpleStem(userWord) === termStem) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
-const STOP_WORDS = new Set([
-  "the", "a", "an", "is", "are", "was", "were", "be", "been", "being",
-  "for", "to", "of", "in", "on", "it", "and", "or", "but", "not",
-  "with", "that", "this", "from", "by", "at", "as", "can", "may",
-  "if", "do", "does", "did", "has", "have", "had", "will", "would",
-  "shall", "should", "could", "might", "must", "need", "dare",
-  "its", "your", "my", "his", "her", "our", "their", "them", "they",
-  "we", "you", "he", "she", "me", "us", "him", "who", "what", "which",
-  "when", "where", "how", "why", "all", "each", "every", "both",
-  "few", "more", "most", "other", "some", "such", "no", "nor",
-  "too", "very", "just", "also", "than", "then", "so", "up", "out",
-  "about", "into", "over", "after", "before", "between", "under",
-  "again", "further", "once", "here", "there", "any", "get", "gets",
-  "got", "even", "still", "already", "yet", "only",
-]);
-
-/**
- * Extract key terms from an answer key bullet point.
- * Strips punctuation, removes stop words, returns lowercase content words.
- */
-function extractKeyTerms(bullet: string): string[] {
-  const words = bullet
-    .toLowerCase()
-    .replace(/[^a-z0-9\s/-]/g, " ")
-    .split(/\s+/)
-    .filter((w) => w.length > 1 && !STOP_WORDS.has(w));
-  return words;
-}
-
-/**
- * Check if a user's answer matches a bullet point from the answer key.
- * A bullet is "matched" if >= 40% of its key terms appear in the user answer.
- * Uses synonym matching and simple stemming for more forgiving comparisons.
- */
-function bulletMatches(bullet: string, userAnswerLower: string): boolean {
-  const keyTerms = extractKeyTerms(bullet);
-  if (keyTerms.length === 0) return true; // trivial bullet
-
-  // Pre-split user answer into words for stem comparison
-  const userAnswerWords = userAnswerLower
-    .replace(/[^a-z0-9\s/-]/g, " ")
-    .split(/\s+/)
-    .filter((w) => w.length > 1);
-
-  let matched = 0;
-  for (const term of keyTerms) {
-    if (termExistsInAnswer(term, userAnswerLower, userAnswerWords)) {
-      matched++;
-    }
-  }
-
-  return matched / keyTerms.length >= 0.4;
-}
-
-/**
- * Grade a single question.
- */
-export function gradeQuestion(
-  question: AssessmentQuestion,
-  userAnswer: string
-): GradedAnswer {
-  const userAnswerLower = userAnswer.toLowerCase();
+export function gradeQuestion(question: AssessmentQuestion, userAnswer: string): GradedAnswer {
+  const normalized = normalizeAnswer(userAnswer);
+  const rubric = assessmentRubrics[question.id];
   const totalPoints = question.answerKey.length;
-  let matchedPoints = 0;
-  const feedback: string[] = [];
-
-  for (const bullet of question.answerKey) {
-    if (bulletMatches(bullet, userAnswerLower)) {
-      matchedPoints++;
-    } else {
-      feedback.push(bullet);
+  const metaContradiction = /(?:everything|all (?:of )?(?:the )?(?:statements|answers|ideas|points)).{0,30}(?:below|above)?.{0,20}(?:wrong|false|incorrect)|(?:it is|it's) (?:false|incorrect|wrong) that/.test(normalized);
+  const contradiction = metaContradiction || rubric && hasContradiction(normalized, rubric.contradictions || []);
+  const unsupported = !rubric || rubric.criteria.length !== totalPoints;
+  const evidence = question.answerKey.map((_, i) => {
+    if (!normalized || unsupported || contradiction) return null;
+    for (const pattern of rubric.criteria[i]) {
+      const match = pattern.exec(normalized);
+      if (match) {
+        // Affirmative concepts cannot be credited if directly negated.
+        const prefix = normalized.slice(Math.max(0, match.index - 25), match.index);
+        if (/(?:not|never|cannot)\s+$/.test(prefix)) continue;
+        return match[0] || normalized;
+      }
     }
-  }
-
-  const score = totalPoints > 0 ? Math.round((matchedPoints / totalPoints) * 100) : 0;
-
+    return null;
+  });
+  const matchedPoints = evidence.filter(value => value !== null).length;
+  const feedback = question.answerKey.filter((_, i) => evidence[i] === null);
   return {
-    questionId: question.id,
-    tier: question.tier,
-    userAnswer,
-    score,
-    matchedPoints,
-    totalPoints,
-    feedback,
+    questionId: question.id, tier: question.tier, userAnswer,
+    score: totalPoints ? Math.round(matchedPoints / totalPoints * 100) : 0,
+    matchedPoints, totalPoints, feedback, evidence,
+    reviewRequired: feedback.length > 0 || Boolean(contradiction) || unsupported,
+    reviewReason: contradiction ? "This answer may contradict a core idea. Automatic credit is withheld for this question until a trainer reviews it."
+      : unsupported ? "No verified grading rubric is available for this question."
+      : feedback.length ? "The automatic check could not confirm every idea. This may be missing detail or wording it does not recognize; review the answer before judging it."
+      : undefined,
   };
 }
 
-/**
- * Grade an entire assessment attempt.
- */
-export function gradeAssessment(
-  questions: AssessmentQuestion[],
-  answers: Record<string, string>
-): AssessmentGradeResult {
-  const gradedAnswers: GradedAnswer[] = questions.map((q) =>
-    gradeQuestion(q, answers[q.id] || "")
-  );
-
+export function summarizeGrades(gradedAnswers: GradedAnswer[]): AssessmentGradeResult {
   const totalQuestions = gradedAnswers.length;
-  const totalCorrect = gradedAnswers.filter((a) => a.score >= 70).length;
-  const overallScore =
-    totalQuestions > 0
-      ? Math.round(gradedAnswers.reduce((sum, a) => sum + a.score, 0) / totalQuestions)
-      : 0;
-
-  // Build tier scores
-  const tierScores: Record<string, { score: number; total: number; passed: number }> = {};
-  for (const ga of gradedAnswers) {
-    if (!tierScores[ga.tier]) {
-      tierScores[ga.tier] = { score: 0, total: 0, passed: 0 };
-    }
-    tierScores[ga.tier].total++;
-    tierScores[ga.tier].score += ga.score;
-    if (ga.score >= 70) tierScores[ga.tier].passed++;
+  const totalCorrect = gradedAnswers.filter(a => a.score >= PASS_SCORE && !a.reviewRequired).length;
+  const tierScores: AssessmentGradeResult['tierScores'] = {};
+  for (const answer of gradedAnswers) {
+    const tier = tierScores[answer.tier] ||= { score: 0, total: 0, passed: 0 };
+    tier.score += answer.score; tier.total++;
+    if (answer.score >= PASS_SCORE && !answer.reviewRequired) tier.passed++;
   }
-  // Average the tier scores
-  for (const tier of Object.keys(tierScores)) {
-    tierScores[tier].score = Math.round(tierScores[tier].score / tierScores[tier].total);
-  }
-
+  for (const tier of Object.values(tierScores)) tier.score = Math.round(tier.score / tier.total);
   return {
-    overallScore,
-    totalCorrect,
-    totalQuestions,
-    tierScores,
-    gradedAnswers,
+    overallScore: totalQuestions ? Math.round(gradedAnswers.reduce((sum, a) => sum + a.score, 0) / totalQuestions) : 0,
+    totalCorrect, totalQuestions, reviewCount: gradedAnswers.filter(a=>a.reviewRequired).length,
+    tierScores, gradedAnswers,
   };
+}
+export function gradeAssessment(questions: AssessmentQuestion[], answers: Record<string, string>): AssessmentGradeResult {
+  return summarizeGrades(questions.map(q => gradeQuestion(q, answers[q.id] || "")));
 }
