@@ -24,8 +24,8 @@ const refuseFalse = criterion(
   has("false|fraud|undervalu|non.?compliant", "refuse|reject|stop|pause")
 );
 const harms = criterion("\\b(?:risks?|cause|lead|result|can|could|may|possible|potential)\\b"+gap+"(?:"+effect+")");
-const noUndervalue = [re("(?:i will|we will|i would|we should|just) (?:declare|enter|put|use) (?:\\$?20|zero|0|a lower value)"), re("(?:it is|it's|is) (?:fine|okay|ok|acceptable|safe) to undervalue")];
-const noFalseAcceptance = [re("(?:i will|i would|we should|just) (?:accept|process|ship)"+gap+"(?:anyway|even if|despite|non.?compliant)"), re("(?:previous|past|before)"+gap+"(?:proves? compliance|guarantees? acceptance|means it is compliant)")];
+const noUndervalue = [re("(?:cannot|do not|will not|must not|should not) (?:refuse|reject|correct)"+gap+"(?:false|fraud|undervalu)"),re("(?:will|would|should|can) (?:accept|process)"+gap+"(?:false|fraudulent|undervalued)"),re("(?:i will|we will|i would|we should|just) (?:declare|enter|put|use) (?:\\$?20|zero|0|a lower value)"), re("(?:it is|it's|is) (?:fine|okay|ok|acceptable|safe) to undervalue")];
+const noFalseAcceptance = [re("(?:do not|must not|should not|will not|never) (?:follow|meet|comply with)"+gap+"(?:current|applicable)"+gap+"(?:requirements|rules|regulations)"),re("(?:i will|i would|we should|just) (?:accept|process|ship)"+gap+"(?:anyway|even if|despite|non.?compliant)"), re("(?:previous|past|before)"+gap+"(?:proves? compliance|guarantees? acceptance|means it is compliant)")];
 export const assessmentRubrics: Record<string, ConceptRubric> = {
   't1-1': { criteria: [
     criterion(has("\\bdoc\\b|dox|documents|paperwork", "no commercial|without commercial|non.?commercial|no resale")),

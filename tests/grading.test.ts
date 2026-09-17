@@ -111,3 +111,17 @@ test('negating the need for phone contact is not credited',()=>{
  const result=gradeQuestion(question('t1-10'),'DHL and customs do not need a receiver phone number to arrange delivery. The shipment is never delayed or returned because a number is missing.');
  assert.equal(result.reviewRequired,true);assert.equal(result.score,0);
 });
+
+for(const id of ['t2-4','sc-1']) test(`${id}: inability to refuse fraud is not a refusal`,()=>{
+ const result=gradeQuestion(question(id),'I cannot refuse to process a false declaration. I will warn them that customs can impose fines, holds and seizure.');
+ assert.equal(result.reviewRequired,true);assert.equal(result.score,0);
+});
+test('contradicting the current-rules obligation requires review even after a good explanation',()=>{
+ const result=gradeQuestion(question('sc-7'),employeeRun['sc-7']+' We should not follow current requirements.');
+ assert.equal(result.reviewRequired,true);
+});
+
+test('a negated unsafe statement does not hide a later unsafe instruction',()=>{
+ const result=gradeQuestion(question('t1-3'),employeeRun['t1-3']+' Do not ignore the invalid account. Ignore the invalid account.');
+ assert.equal(result.reviewRequired,true);assert.equal(result.score,0);
+});

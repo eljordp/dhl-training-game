@@ -37,11 +37,13 @@ export function normalizeAnswer(answer: string): string {
  */
 function hasContradiction(answer: string, patterns: RegExp[]): boolean {
   return patterns.some(pattern => {
-    const match = pattern.exec(answer);
-    if (!match) return false;
-    if (/(?:does not|cannot|never|not) (?:prove|mean|guarantee)/.test(match[0])) return false;
-    const prefix = answer.slice(Math.max(0, match.index - 35), match.index);
-    return !/(?:do not|must not|never|cannot|should not|will not|not to)\s+(?:\w+\s+){0,2}$/.test(prefix);
+    for (const match of answer.matchAll(new RegExp(pattern.source, "gi"))) {
+      if (/(?:does not|cannot|never|not) (?:prove|mean|guarantee)/.test(match[0])) continue;
+      const prefix = answer.slice(Math.max(0, match.index - 35), match.index);
+      if (/(?:do not|must not|never|cannot|should not|will not|not to)\s+(?:\w+\s+){0,2}$/.test(prefix)) continue;
+      return true;
+    }
+    return false;
   });
 }
 

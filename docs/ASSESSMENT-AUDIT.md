@@ -16,7 +16,7 @@
 
 ## Evidence and limits
 
-- 204 automated tests: all 37 original answers, every rubric, blank/nonsense/keyword lists, alternative examples and paraphrases, wrong and contradictory answers, aggregate scoring, report consistency and server input validation.
+- 208 automated tests: all 37 original answers, every rubric, blank/nonsense/keyword lists, alternative examples and paraphrases, wrong and contradictory answers, aggregate scoring, report consistency and server input validation.
 - TypeScript and production build pass. Changed quiz/grading files pass ESLint. Existing unrelated lint errors remain in game/results/consent components; no clean full-repository lint claim.
 - Local browser replay: all 37 questions completed, 97%, 36/37 fully recognized, one review (ECX); repeat seven-question attempt reset correctly, 86% with a deliberately false declaration under review. No browser console errors in that check.
 - Local report download verified on disk (37 answers); phone-sized result page inspected at 390×844.
